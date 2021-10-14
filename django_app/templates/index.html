@@ -1,0 +1,9 @@
+<html>
+    <body>
+        <h1>Test</h1>
+        <form action="{% url 'django_app:pre_records' %}" method="POST" id="index_form">{% csrf_token %}
+            <input type="hidden" value="newOrder" name="orderId" \>
+            <button type="submit" name="action">Senden</button>
+        </form>
+    </body>
+</html>
