@@ -5,11 +5,10 @@ from . import functions
 def index(request):    
     TestSampleIdent = 723
     OrderIdent = 469
-    [TestIdents, Tests] = functions.getTestsOfTestSampleForSpecificOrder(TestSampleIdent=TestSampleIdent, OrderIdent=OrderIdent)
-    print(Tests)
+    formattedTests = functions.getTestsOfTestSampleForSpecificOrder(TestSampleIdent=TestSampleIdent, OrderIdent=OrderIdent)
     data = {
-        'testIdents': TestIdents, 
-        'tests': Tests, 
+        'tests': formattedTests, 
         'protocol': [],
     }
+    print(formattedTests)
     return render(request, "app_tabulator/templates/index.html", data)

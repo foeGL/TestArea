@@ -3,12 +3,10 @@ from django_project import sql_db
 def getTestsOfTestSampleForSpecificOrder(TestSampleIdent, OrderIdent):
     db = sql_db.openDB()
     allTestIdentsForTestSample = getAllTestIdentsForTestSample(TestSampleIdent, db)
-    allTestForTestSample = []
-    newTestIdents = []
-    if allTestIdentsForTestSample:
-        allTestForTestSample, newTestIdents = getTestsByTestIdents(allTestIdentsForTestSample, OrderIdent, db)
+    allTestForTestSample, newTestIdents = getTestsByTestIdents(TestIdents=allTestIdentsForTestSample, OrderIdent=OrderIdent, db=db)
     sql_db.closeDB(db)
-    return newTestIdents, allTestForTestSample
+    formattedTests = formatTestsForTable(allTestForTestSample)
+    return formattedTests
 
     
 def getAllTestIdentsForTestSample(TestSampleIdent, db):
@@ -21,22 +19,48 @@ def getAllTestIdentsForTestSample(TestSampleIdent, db):
 
 def getTestsByTestIdents(TestIdents, OrderIdent, db):
     newTestIdents = []
-    table = 'TCPD_Tests'
-    values = ['TestIdent', 'TestNumber', 'Description', 'TemplateIdent']
-    if len(TestIdents)>1:
-        where = f"OrderIdent={OrderIdent} AND (TestIdent={' OR TestIdent='.join(str(x) for x in TestIdents)})"
-    else:
-        where = f"OrderIdent={OrderIdent} AND TestIdent={TestIdents[0]}"
-    data = sql_db.readFromTable(db=db, table=table, values=values, where=where)
-    tests = {}
-    for key in data:        
-        line = data[key]      
-        id = line['TestIdent']
-        name = f"TE{'{0:0=2d}'.format(line['TestNumber'])}"
-        standard = getStandardForTest(db=db, TemplateIdent=line['TemplateIdent'])
-        tests[id] = {'name': name, 'formatted': f"{name} - {line['Description']}", 'standard': standard}
-        newTestIdents.append(id)
+    tests = []
+    if TestIdents:
+        table = 'TCPD_Tests'
+        values = ['TestIdent', 'TestNumber', 'Description', 'TemplateIdent']
+        if len(TestIdents)>1:
+            where = f"OrderIdent={OrderIdent} AND (TestIdent={' OR TestIdent='.join(map(str, TestIdents))})"
+        else:
+            where = f"OrderIdent={OrderIdent} AND TestIdent={TestIdents[0]}"
+        data = sql_db.readFromTable(db=db, table=table, values=values, where=where)
+        tests = {}
+        for key in data:        
+            line = data[key]      
+            id = line['TestIdent']
+            name = f"TE{'{0:0=2d}'.format(line['TestNumber'])}"
+            #standard = getStandardForTest(db=db, TemplateIdent=line['TemplateIdent'])
+            testPackage = getTestPackageForTest(db=db, TestIdent=id)
+            #tests[id] = {'Name': name, 'Formatted': f"{name} - {line['Description']}", 'TestPackage': testPackage} #'standard': standard}
+            if not testPackage in tests:
+                tests[testPackage] = {
+                    name:{
+                        'TestIdent': id, 'Formatted': f"{name} - {line['Description']}"
+                    }     
+                }
+            else:
+                tests[testPackage][name] = {'TestIdent': id, 'Formatted': f"{name} - {line['Description']}"}
+            newTestIdents.append(id)
     return tests, newTestIdents
+
+def getTestPackageForTest(db, TestIdent):
+    table = 'TCPD_TestStructures'
+    values = ['SourceIdent']
+    where = f"AssignedObjectClass='Test' AND AssignedIdent={TestIdent} AND SourceObjectClass='TestPackage'"
+    data = sql_db.readFromTable(db=db, table=table, values=values, where=where)
+    if data:
+        table = 'TCPD_TestPackages'
+        values = ['Description']
+        where = f"TestPackageIdent={data[0]['SourceIdent']}"
+        data = sql_db.readFromTable(db=db, table=table, values=values, where=where)
+        return data[0]['Description']
+    else:
+        return ""
+
 
 def getStandardForTest(db, TemplateIdent):
     table = 'TCPD_TestPlanTemplates'
@@ -52,6 +76,41 @@ def getStandardForTest(db, TemplateIdent):
         return data[0]['StandardDescription']
     else:
         return ""
+
+def formatTestsForTable(allTestForTestSample):
+    returnValue = []
+    if allTestForTestSample:
+        returnValue = {}
+        counterID = 0
+        for testpackage in allTestForTestSample:
+            counterID +=1
+            startID = counterID
+            children = []
+            for test in allTestForTestSample[testpackage]:
+                counterID +=1
+                children.append({
+                    "id": counterID,  
+                    "testIdent":allTestForTestSample[testpackage][test]['TestIdent'],
+                    "name": allTestForTestSample[testpackage][test]["Formatted"], 
+                })
+            returnValue[len(returnValue)] = {'id': startID, 'name':testpackage, 'children': children}
+
+    return returnValue
+
+"""
+
+for test in allTestForTestSample[testpackage]:
+
+if not testPackage in returnValue:
+    tests[testPackage] = {
+        name:{
+            'TestIdent': id, 'Formatted': f"{name} - {line['Description']}"
+        }     
+    }
+else:
+    tests[testPackage][name] = {'TestIdent': id, 'Formatted': f"{name} - {line['Description']}"}
+"""
+
 
 
 def getTestData():
