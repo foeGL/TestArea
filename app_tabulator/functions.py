@@ -3,7 +3,8 @@ from django_project import sql_db
 def getTestsOfTestSampleForSpecificOrder(TestSampleIdent, OrderIdent):
     db = sql_db.openDB()
     allTestIdentsForTestSample = getAllTestIdentsForTestSample(TestSampleIdent, db)
-    allTestForTestSample, newTestIdents = getTestsByTestIdents(TestIdents=allTestIdentsForTestSample, OrderIdent=OrderIdent, db=db)
+    allTestForTestSample, newTestIdents = getTestsByTestIdents(TestIdents=allTestIdentsForTestSample, OrderIdent=OrderIdent, db=db)    
+    linkedTestPackages = getLinkedTestPackages() # <==============================================================================================
     sql_db.closeDB(db)
     formattedTests = formatTestsForTable(allTestForTestSample)
     return formattedTests
@@ -47,6 +48,20 @@ def getTestsByTestIdents(TestIdents, OrderIdent, db):
             newTestIdents.append(id)
     return tests, newTestIdents
 
+def getLinkedTestPackages(db, TestPackages):
+    """
+    TestStructureIdent: 11077
+    SourceObjectClass: TestPackage
+    SourceIdent: 272
+    AssignedObjectClass: TestPackage
+    AssignedIdent: 273 <=============================================
+    SpecificationIdent: 
+    LineIdent: 2
+    SortCode: 2
+    """
+    data = []
+    return data
+
 def getTestPackageForTest(db, TestIdent):
     table = 'TCPD_TestStructures'
     values = ['SourceIdent']
@@ -77,39 +92,36 @@ def getStandardForTest(db, TemplateIdent):
     else:
         return ""
 
+
 def formatTestsForTable(allTestForTestSample):
     returnValue = []
     if allTestForTestSample:
         returnValue = {}
         counterID = 0
         for testpackage in allTestForTestSample:
-            counterID +=1
-            startID = counterID
-            children = []
-            for test in allTestForTestSample[testpackage]:
+            if testpackage != "":
                 counterID +=1
-                children.append({
-                    "id": counterID,  
-                    "testIdent":allTestForTestSample[testpackage][test]['TestIdent'],
-                    "name": allTestForTestSample[testpackage][test]["Formatted"], 
-                })
-            returnValue[len(returnValue)] = {'id': startID, 'name':testpackage, 'children': children}
-
+                startID = counterID
+                children = []
+                for test in allTestForTestSample[testpackage]:
+                    counterID +=1
+                    children.append({
+                        "id": counterID,  
+                        "testIdent":allTestForTestSample[testpackage][test]['TestIdent'],
+                        "name": allTestForTestSample[testpackage][test]["Formatted"], 
+                    })
+                returnValue[len(returnValue)] = {'id': startID, 'testIdent': [], 'name':testpackage, 'children': children}
+            else:
+                for test in allTestForTestSample[testpackage]:
+                    counterID +=1
+                    returnValue[len(returnValue)] = {
+                        "id": counterID,  
+                        "testIdent":allTestForTestSample[testpackage][test]['TestIdent'],
+                        "name": allTestForTestSample[testpackage][test]["Formatted"]
+                    }
     return returnValue
 
-"""
 
-for test in allTestForTestSample[testpackage]:
-
-if not testPackage in returnValue:
-    tests[testPackage] = {
-        name:{
-            'TestIdent': id, 'Formatted': f"{name} - {line['Description']}"
-        }     
-    }
-else:
-    tests[testPackage][name] = {'TestIdent': id, 'Formatted': f"{name} - {line['Description']}"}
-"""
 
 
 
