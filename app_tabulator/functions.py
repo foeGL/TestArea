@@ -3,10 +3,16 @@ from django_project import sql_db
 def getTestsOfTestSampleForSpecificOrder(TestSampleIdent, OrderIdent):
     db = sql_db.openDB()
     allTestIdentsForTestSample = getAllTestIdentsForTestSample(TestSampleIdent, db)
-    allTestForTestSample, newTestIdents = getTestsByTestIdents(TestIdents=allTestIdentsForTestSample, OrderIdent=OrderIdent, db=db)    
-    linkedTestPackages = getLinkedTestPackages() # <==============================================================================================
+    tests = getTestsByTestIdentsForOrder(TestIdents=allTestIdentsForTestSample, OrderIdent=OrderIdent, db=db)    
+    tests = addTestPackageIdentsToTest(tests=tests, db=db)
+    testPackages = list(tests.keys())
+    testPackageStructure = getTestPackageStructure(testPackages=testPackages, db=db)
+    #linkedTestPackages = getLinkedTestPackages() # <==============================================================================================
+    
+    formattedTests, counterID = formatTestsForTable(tests=tests, testPackages=testPackageStructure, topTestPackageIndex='', db=db)    
+    formattedTests = addTestsWithoutTestPackages(returnValue=formattedTests, tests=tests, counterID=counterID, testPackage='')
+    print(formattedTests)
     sql_db.closeDB(db)
-    formattedTests = formatTestsForTable(allTestForTestSample)
     return formattedTests
 
     
@@ -18,9 +24,7 @@ def getAllTestIdentsForTestSample(TestSampleIdent, db):
     data = sql_db.readFromTable(db=db, table=table, values=values, where=where, dictKey=dictKey)
     return sorted(list(data.keys()))
 
-def getTestsByTestIdents(TestIdents, OrderIdent, db):
-    newTestIdents = []
-    tests = []
+def getTestsByTestIdentsForOrder(TestIdents, OrderIdent, db):
     if TestIdents:
         table = 'TCPD_Tests'
         values = ['TestIdent', 'TestNumber', 'Description', 'TemplateIdent']
@@ -28,25 +32,26 @@ def getTestsByTestIdents(TestIdents, OrderIdent, db):
             where = f"OrderIdent={OrderIdent} AND (TestIdent={' OR TestIdent='.join(map(str, TestIdents))})"
         else:
             where = f"OrderIdent={OrderIdent} AND TestIdent={TestIdents[0]}"
-        data = sql_db.readFromTable(db=db, table=table, values=values, where=where)
-        tests = {}
-        for key in data:        
-            line = data[key]      
-            id = line['TestIdent']
-            name = f"TE{'{0:0=2d}'.format(line['TestNumber'])}"
-            #standard = getStandardForTest(db=db, TemplateIdent=line['TemplateIdent'])
-            testPackage = getTestPackageForTest(db=db, TestIdent=id)
-            #tests[id] = {'Name': name, 'Formatted': f"{name} - {line['Description']}", 'TestPackage': testPackage} #'standard': standard}
-            if not testPackage in tests:
-                tests[testPackage] = {
-                    name:{
-                        'TestIdent': id, 'Formatted': f"{name} - {line['Description']}"
-                    }     
-                }
+        dictKey = 'TestIdent'
+        data = sql_db.readFromTable(db=db, table=table, values=values, where=where, dictKey=dictKey)
+    return data
+
+def addTestPackageIdentsToTest(tests, db):
+    testswithTestPackages = {}
+    for testIdent in tests:        
+        testPackage = getTestPackageForTest(db=db, TestIdent=testIdent)
+        if testPackage:
+            if testPackage not in testswithTestPackages:
+                testswithTestPackages[testPackage] = {testIdent:tests[testIdent]}
             else:
-                tests[testPackage][name] = {'TestIdent': id, 'Formatted': f"{name} - {line['Description']}"}
-            newTestIdents.append(id)
-    return tests, newTestIdents
+                testswithTestPackages[testPackage][testIdent] = tests[testIdent]
+        else:
+            if '' not in testswithTestPackages:
+                testswithTestPackages[''] = {testIdent:tests[testIdent]}
+            else:
+                testswithTestPackages[''][testIdent] = tests[testIdent]
+    return testswithTestPackages
+
 
 def getLinkedTestPackages(db, TestPackages):
     """
@@ -62,19 +67,45 @@ def getLinkedTestPackages(db, TestPackages):
     data = []
     return data
 
+    """
+    tests = {}
+    for key in Tests:        
+        line = Tests[key]      
+        id = line['TestIdent']
+        name = f"TE{'{0:0=2d}'.format(line['TestNumber'])}"
+        #standard = getStandardForTest(db=db, TemplateIdent=line['TemplateIdent'])
+        testPackage = getTestPackageForTest(db=db, TestIdent=id)
+        #tests[id] = {'Name': name, 'Formatted': f"{name} - {line['Description']}", 'TestPackage': testPackage} #'standard': standard}
+        if not testPackage in tests:
+            tests[testPackage] = {
+                name:{
+                    'TestIdent': id, 'Formatted': f"{name} - {line['Description']}"
+                }     
+            }
+        else:
+            tests[testPackage][name] = {'TestIdent': id, 'Formatted': f"{name} - {line['Description']}"}
+    """
+    return []
+
 def getTestPackageForTest(db, TestIdent):
     table = 'TCPD_TestStructures'
     values = ['SourceIdent']
     where = f"AssignedObjectClass='Test' AND AssignedIdent={TestIdent} AND SourceObjectClass='TestPackage'"
     data = sql_db.readFromTable(db=db, table=table, values=values, where=where)
     if data:
+        return data[0]['SourceIdent']
+    else:
+        return []
+
+def getTestPackageName(TestPackageIdent, db):
+    if TestPackageIdent:
         table = 'TCPD_TestPackages'
         values = ['Description']
-        where = f"TestPackageIdent={data[0]['SourceIdent']}"
+        where = f"TestPackageIdent={TestPackageIdent}"
         data = sql_db.readFromTable(db=db, table=table, values=values, where=where)
         return data[0]['Description']
     else:
-        return ""
+        return []
 
 
 def getStandardForTest(db, TemplateIdent):
@@ -92,38 +123,99 @@ def getStandardForTest(db, TemplateIdent):
     else:
         return ""
 
-
-def formatTestsForTable(allTestForTestSample):
-    returnValue = []
-    if allTestForTestSample:
-        returnValue = {}
-        counterID = 0
-        for testpackage in allTestForTestSample:
-            if testpackage != "":
-                counterID +=1
-                startID = counterID
-                children = []
-                for test in allTestForTestSample[testpackage]:
-                    counterID +=1
-                    children.append({
-                        "id": counterID,  
-                        "testIdent":allTestForTestSample[testpackage][test]['TestIdent'],
-                        "name": allTestForTestSample[testpackage][test]["Formatted"], 
-                    })
-                returnValue[len(returnValue)] = {'id': startID, 'testIdent': [], 'name':testpackage, 'children': children}
+def getTestPackageStructure(testPackages, db):    
+    print(testPackages)
+    structure = {}
+    table = 'TCPD_TestStructures'
+    values = ['SourceIdent']
+    for testPackage in testPackages:
+        if not testPackage == '':
+            where = f"SourceObjectClass='TestPackage' AND AssignedObjectClass='TestPackage' AND AssignedIdent={testPackage}"
+            data = sql_db.readFromTable(db=db, table=table, values=values, where=where)
+            if not data:
+                if '' not in structure:
+                    tmp = [testPackage]
+                else:
+                    tmp = structure['']
+                    tmp.append(testPackage)
+                structure[''] = tmp
             else:
-                for test in allTestForTestSample[testpackage]:
-                    counterID +=1
-                    returnValue[len(returnValue)] = {
-                        "id": counterID,  
-                        "testIdent":allTestForTestSample[testpackage][test]['TestIdent'],
-                        "name": allTestForTestSample[testpackage][test]["Formatted"]
-                    }
+                key = data[0]['SourceIdent']
+                if key not in structure:
+                    tmp = [testPackage]
+                else:
+                    tmp = structure[key]
+                    tmp.append(testPackage)
+                structure[key] = tmp
+    return structure
+
+def formatTestsForTable(testPackages, tests, db, topTestPackageIndex=[]): 
+    subPackageChildren = []
+    counterID = 1
+    returnValue = {}
+    if topTestPackageIndex in testPackages:
+        tmpStartID = counterID
+        for topTestPackage in testPackages[topTestPackageIndex]:
+            if topTestPackage in testPackages:
+                subPackageChildren = []
+                for subTestPackage in testPackages[topTestPackage]:
+                    childs, counterID = getSubTestPackageChildren(testPackages, tests, db, topTestPackageIndex=subTestPackage, counterID=counterID)
+                    if childs:
+                        subPackageChildren.append(childs)
+            else:
+                print("ist nicht drin")
+                
+            counterID += 1
+            children, counterID = getTestPackageChildren(testPackages=testPackages, testPackage=topTestPackage, startID=counterID, tests=tests, db=db)
+            returnValue[len(returnValue)] = {'id': tmpStartID, 'testIdent': [], 'name':getTestPackageName(topTestPackage, db), '_children': subPackageChildren+children} 
+    return returnValue, counterID
+
+def getSubTestPackageChildren(testPackages, tests, db, counterID, topTestPackageIndex=[]):
+    returnValue = []
+    counterID +=1
+    tmpStartID = counterID
+    subPackageChildren = []
+    if topTestPackageIndex in testPackages:
+        for subTestPackage in testPackages[topTestPackageIndex]:
+            subPackageChildren.append(getSubTestPackageChildren(testPackages, tests, db, topTestPackageIndex=subTestPackage))
+    else:
+        print("has no others!")
+
+    children, counterID = getTestPackageChildren(testPackages=testPackages, testPackage=topTestPackageIndex, startID=counterID, tests=tests, db=db)
+    returnValue = {'id': tmpStartID, 'testIdent': [], 'name':getTestPackageName(topTestPackageIndex, db), '_children': subPackageChildren+children} 
+    return returnValue, counterID
+
+def getTestPackageChildren(testPackages, testPackage, startID, tests, db, topTestPackageIndex=[]):
+    children = []
+    counterID = startID
+    print(f"-> {testPackage}")
+    if testPackage in tests:
+        print("ist drin")
+        for test in tests[testPackage]:
+            name = f"TE{'{0:0=2d}'.format(tests[testPackage][test]['TestNumber'])}"
+            counterID +=1
+            children.append({
+                "id": counterID,  
+                "testIdent":tests[testPackage][test]['TestIdent'],
+                "name": f"{name} - {tests[testPackage][test]['Description']}",
+            })
+            print(children)
+    else:
+        print("ist schon wieder nicht drin!")
+    return children, counterID
+
+
+def addTestsWithoutTestPackages(returnValue, tests, counterID, testPackage):
+    if testPackage in tests:
+        for test in tests[testPackage]:
+            counterID +=1
+            name = f"TE{'{0:0=2d}'.format(tests[testPackage][test]['TestNumber'])}"
+            returnValue[len(returnValue)] = {
+                "id": counterID,  
+                "testIdent":tests[testPackage][test]['TestIdent'],
+                "name": f"{name} - {tests[testPackage][test]['Description']}",
+            }
     return returnValue
-
-
-
-
 
 def getTestData():
     print("starte")

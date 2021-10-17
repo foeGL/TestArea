@@ -22,7 +22,7 @@ console.log("tableDataNested", tableDataNested)
 
 var tableDataNested = []        
 for (const [key1, arr] of Object.entries(array_tests)){
-    tableDataNested.push({id: array_tests[key1]['id'],name: array_tests[key1]['name'], _children: array_tests[key1]['children']})
+    tableDataNested.push(arr)
 }
 
 console.log("tableDataNested", tableDataNested)
