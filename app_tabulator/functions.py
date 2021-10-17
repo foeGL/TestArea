@@ -162,8 +162,6 @@ def formatTestsForTable(testPackages, tests, db, topTestPackageIndex=[]):
                     childs, counterID = getSubTestPackageChildren(testPackages, tests, db, topTestPackageIndex=subTestPackage, counterID=counterID)
                     if childs:
                         subPackageChildren.append(childs)
-            else:
-                print("ist nicht drin")
                 
             counterID += 1
             children, counterID = getTestPackageChildren(testPackages=testPackages, testPackage=topTestPackage, startID=counterID, tests=tests, db=db)
@@ -178,19 +176,14 @@ def getSubTestPackageChildren(testPackages, tests, db, counterID, topTestPackage
     if topTestPackageIndex in testPackages:
         for subTestPackage in testPackages[topTestPackageIndex]:
             subPackageChildren.append(getSubTestPackageChildren(testPackages, tests, db, topTestPackageIndex=subTestPackage))
-    else:
-        print("has no others!")
-
     children, counterID = getTestPackageChildren(testPackages=testPackages, testPackage=topTestPackageIndex, startID=counterID, tests=tests, db=db)
     returnValue = {'id': tmpStartID, 'testIdent': [], 'name':getTestPackageName(topTestPackageIndex, db), '_children': subPackageChildren+children} 
     return returnValue, counterID
 
-def getTestPackageChildren(testPackages, testPackage, startID, tests, db, topTestPackageIndex=[]):
+def getTestPackageChildren(testPackage, startID, tests):
     children = []
     counterID = startID
-    print(f"-> {testPackage}")
     if testPackage in tests:
-        print("ist drin")
         for test in tests[testPackage]:
             name = f"TE{'{0:0=2d}'.format(tests[testPackage][test]['TestNumber'])}"
             counterID +=1
@@ -199,9 +192,6 @@ def getTestPackageChildren(testPackages, testPackage, startID, tests, db, topTes
                 "testIdent":tests[testPackage][test]['TestIdent'],
                 "name": f"{name} - {tests[testPackage][test]['Description']}",
             })
-            print(children)
-    else:
-        print("ist schon wieder nicht drin!")
     return children, counterID
 
 
