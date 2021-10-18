@@ -53,40 +53,6 @@ def addTestPackageIdentsToTest(tests, db):
     return testswithTestPackages
 
 
-def getLinkedTestPackages(db, TestPackages):
-    """
-    TestStructureIdent: 11077
-    SourceObjectClass: TestPackage
-    SourceIdent: 272
-    AssignedObjectClass: TestPackage
-    AssignedIdent: 273 <=============================================
-    SpecificationIdent: 
-    LineIdent: 2
-    SortCode: 2
-    """
-    data = []
-    return data
-
-    """
-    tests = {}
-    for key in Tests:        
-        line = Tests[key]      
-        id = line['TestIdent']
-        name = f"TE{'{0:0=2d}'.format(line['TestNumber'])}"
-        #standard = getStandardForTest(db=db, TemplateIdent=line['TemplateIdent'])
-        testPackage = getTestPackageForTest(db=db, TestIdent=id)
-        #tests[id] = {'Name': name, 'Formatted': f"{name} - {line['Description']}", 'TestPackage': testPackage} #'standard': standard}
-        if not testPackage in tests:
-            tests[testPackage] = {
-                name:{
-                    'TestIdent': id, 'Formatted': f"{name} - {line['Description']}"
-                }     
-            }
-        else:
-            tests[testPackage][name] = {'TestIdent': id, 'Formatted': f"{name} - {line['Description']}"}
-    """
-    return []
-
 def getTestPackageForTest(db, TestIdent):
     table = 'TCPD_TestStructures'
     values = ['SourceIdent']
@@ -124,7 +90,6 @@ def getStandardForTest(db, TemplateIdent):
         return ""
 
 def getTestPackageStructure(testPackages, db):    
-    print(testPackages)
     structure = {}
     table = 'TCPD_TestStructures'
     values = ['SourceIdent']
@@ -164,7 +129,7 @@ def formatTestsForTable(testPackages, tests, db, topTestPackageIndex=[]):
                         subPackageChildren.append(childs)
                 
             counterID += 1
-            children, counterID = getTestPackageChildren(testPackages=testPackages, testPackage=topTestPackage, startID=counterID, tests=tests, db=db)
+            children, counterID = getTestPackageChildren(testPackage=topTestPackage, startID=counterID, tests=tests, db=db)
             returnValue[len(returnValue)] = {'id': tmpStartID, 'testIdent': [], 'name':getTestPackageName(topTestPackage, db), '_children': subPackageChildren+children} 
     return returnValue, counterID
 
@@ -176,23 +141,65 @@ def getSubTestPackageChildren(testPackages, tests, db, counterID, topTestPackage
     if topTestPackageIndex in testPackages:
         for subTestPackage in testPackages[topTestPackageIndex]:
             subPackageChildren.append(getSubTestPackageChildren(testPackages, tests, db, topTestPackageIndex=subTestPackage))
-    children, counterID = getTestPackageChildren(testPackages=testPackages, testPackage=topTestPackageIndex, startID=counterID, tests=tests, db=db)
+    children, counterID = getTestPackageChildren(testPackage=topTestPackageIndex, startID=counterID, tests=tests, db=db)
     returnValue = {'id': tmpStartID, 'testIdent': [], 'name':getTestPackageName(topTestPackageIndex, db), '_children': subPackageChildren+children} 
     return returnValue, counterID
 
-def getTestPackageChildren(testPackage, startID, tests):
+def getTestPackageChildren(testPackage, startID, tests, db):
     children = []
     counterID = startID
     if testPackage in tests:
         for test in tests[testPackage]:
+            counterID +=1
+            tmpStartID = counterID
+            testIdent = tests[testPackage][test]['TestIdent']
             name = f"TE{'{0:0=2d}'.format(tests[testPackage][test]['TestNumber'])}"
+            formattedName = f"{name} - {tests[testPackage][test]['Description']}"
+            ePPB, counterID = getEPPBForTest(testIdent=testIdent, counterID=counterID, db=db, testName=name, testFormattedName=formattedName)
+            if ePPB:
+                children.append({
+                    "id": tmpStartID,  
+                    "testIdent": testIdent,
+                    "name": formattedName,
+                    "_children": ePPB
+                })
+            else:
+                children.append({
+                    "id": tmpStartID,  
+                    "testIdent": testIdent,
+                    "name": formattedName
+                })
+
+    return children, counterID
+
+def getEPPBForTest(testIdent, counterID, db, testName, testFormattedName):
+    table="TCPD_WebGUI"
+    where = f"TestIdent={testIdent}"
+    order_by = {'Date':'ASC', 'Start': 'ASC'}
+    data = sql_db.readFromTable(db=db, table=table, where=where, order_by=order_by)
+    children = []
+    if data:
+        for ppb in data:
             counterID +=1
             children.append({
-                "id": counterID,  
-                "testIdent":tests[testPackage][test]['TestIdent'],
-                "name": f"{name} - {tests[testPackage][test]['Description']}",
+                'id': counterID,
+                'ProtocolIdent': data[ppb]['ProtocolIdent'],
+                'TestIdent':  testIdent, 
+                #'name': testFormattedName, 
+                'name': testName, 
+                'Operator': data[ppb]['Operator'], 
+                'InvoiceType': data[ppb]['InvoiceType'], 
+                'Date': data[ppb]['Date'], 
+                'Start': data[ppb]['Start'], 
+                'Stop': data[ppb]['Stop'], 
+                'TotalTime': round(data[ppb]['TotalTime'],1), 
+                'isTestFinished': data[ppb]['isTestFinished'],
+                'Comment': data[ppb]['Comment']
             })
     return children, counterID
+
+
+
 
 
 def addTestsWithoutTestPackages(returnValue, tests, counterID, testPackage):

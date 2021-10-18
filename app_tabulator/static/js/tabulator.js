@@ -1,24 +1,4 @@
 const array_tests = JSON.parse(document.getElementById('tests').textContent);
-console.log(array_tests)
-
-var tableDataNested = [
-    {id:1, name:"hödiofha dfha isodhf aosihf iaohe ioahe iofahse iofahse iofah oiefha ief", "_children":[
-        {id:2, name:"Mary May", age:"1", driver:1}, //child rows nested under billy bob
-        {id:3, name:"Christine Lobowski", age:"42", driver:1},
-        {id:4, name:"Brendon Philips", age:"125", driver:1, "_children":[
-            {id:5, name:"Margret Marmajuke", age:"16", driver:1}, //child rows nested under brendon philps
-            {id:6, name:"Frank Peoney", age:"12", driver:1},
-        ]},
-    ]},
-    {id:7, name:"Jenny Jane", age:"1", driver:0},
-    {id:8, name:"Martha Tiddly", age:"42", driver:0, "_children":[
-        {id:9, name:"Frasier Franks", age:"125", driver:0}, //child row nested under martha tiddly
-    ]},
-    {id:10, name:"Bobby Green", age:"11", driver:1},
-]
-
-console.log("tableDataNested", tableDataNested)
-
 
 var tableDataNested = []        
 for (const [key1, arr] of Object.entries(array_tests)){
@@ -28,13 +8,65 @@ for (const [key1, arr] of Object.entries(array_tests)){
 console.log("tableDataNested", tableDataNested)
 
 
+
+var dateEditor = function(cell, onRendered, success, cancel, editorParams){
+    var cellValue = cell.getValue(),
+    input = document.createElement("input");
+    
+    input.setAttribute("type", "text");
+    
+    input.style.padding = "4px";
+    input.style.width = "100%";
+    input.style.boxSizing = "border-box";
+    
+    input.value = typeof cellValue !== "undefined" ? cellValue : "";
+    
+    onRendered(function(){
+        input.style.height = "100%";
+        $(input).datepicker({
+            onClose: onChange
+        }); //turn input into datepicker
+        input.focus();
+    });
+
+    function onChange(e){
+        if(((cellValue === null || typeof cellValue === "undefined") && input.value !== "") || input.value != cellValue){
+            success(input.value);
+        }else{
+            cancel();
+        }
+    }
+
+    
+    //submit new value on blur or change
+    input.addEventListener("change", onChange);
+    input.addEventListener("blur", onChange);
+
+    //submit new value on enter
+    input.addEventListener("keydown", function(e){
+        switch(e.keyCode){
+            case 13:
+            success(input.value);
+            break;
+
+            case 27:
+            cancel();
+            break;
+        }
+    });
+    return input;
+    
+}
+
+
 // http://tabulator.info/docs/4.9/format#row
 // http://tabulator.info/docs/4.9/tree
 
 var table = new Tabulator("#example-nested-table", {
+    width: "10px",
     dataTree:true,
     //dataTreeChildField:"childRows", //look for the child row data array in the childRows field -- only the top-tier rows
-    minheight:"100px",
+    //minheight:"100px",
     data:tableDataNested,
     dataTreeStartExpanded:true,
     layout:"fitColumns",      //fit columns to width of table
@@ -47,6 +79,21 @@ var table = new Tabulator("#example-nested-table", {
     {title:"Name", field:"name", formatter: function(cell, formatterParams) {
         var cellValue = cell.getValue()
         var row = cell.getRow()
+        var parent = row.getTreeParent()
+        //console.log("parent: ", row.getTreeParent())
+        if (parent==false){
+            row.getElement().style.backgroundColor = "white";
+            var cells = row.getCells()
+            for (let i=0; i<cells.length; i++){
+                if (i==0){
+                    cells[i].getElement().style.width = "auto"; // layout:"fitColumns" ist hier essentiell!!
+                }
+                if (i<cells.length-1){
+                    cells[i].getElement().style.border = "none";        
+                }  
+            }
+        } else {}
+        //console.log("getTreeChildren", row.getTreeChildren())
         if (cellValue == "hödiofha dfha isodhf aosihf iaohe ioahe iofahse iofahse iofah oiefha ief"){
             row.getElement().style.backgroundColor = "white";
             var cells = row.getCells()
@@ -61,13 +108,41 @@ var table = new Tabulator("#example-nested-table", {
             }
         }
         return cellValue
-        }, 
-        width:200, responsive:0, widthGrow:3 
+        }, width: '10px', responsive:0,resizable:true
     }, //never hide this column
+    /*
     {title:"Location", field:"location", width:150},
     {title:"Gender", field:"gender", width:150, responsive:2}, //hide this column first
     {title:"Favourite Color", field:"col", width:150},
     {title:"Date Of Birth", field:"dob", hozAlign:"center", sorter:"date", width:150},
     {title:"Driver", field:"driver", width:150},
+    */
+    //{title:"TestIdent", field:"id", hozAlign:"center", visible:0,  resizable:false},
+    //{title:"Norm", field:"Norm", hozAlign:"center", visible:0},        
+    {title:"ProtocolIdent", field:"ProtocolIdent", hozAlign:"center", visible:0,  resizable:true},
+    {title:"TestIdent", field:"TestIdent", hozAlign:"center", visible:0, resizable:true},
+    {title:"Prüfung_Voll", field:"TestNameFull", hozAlign:"center", visible:0},
+    {title:"Abgerechnet", field:"Invoice", hozAlign:"center", formatter:"tickCross", visible:0},
+    {title:"Datum", field:"Date",  hozAlign:"center", resizable:true,  editor:dateEditor},
+    {title:"Start", field:"Start",  hozAlign:"center", resizable:true,  editor:dateEditor},
+    {title:"Stop", field:"Stop",  hozAlign:"center", resizable:true,  editor:dateEditor},
+    {title:"Gesamtzeit", field:"TotalTime",  hozAlign:"center", resizable:true},
+    {title:"Abrechnungsart", field:"InvoiceType",  hozAlign:"center", resizable:true, editor:"select", editorParams:{}, formatter: function(cell, formatterParams) {
+        var cellValue = cell.getValue()
+        if(cellValue == 0){return 'Nicht abrechnen'}
+        if(cellValue == 1){return 'Aufwand'}
+        if(cellValue > 1){return 'Pauschale #' + (cellValue-1)}
+    }},
+    {title:"Beendet", field:"isTestFinished", hozAlign:"center", editor:true, formatter:"tickCross", resizable:true, formatter: function(cell, formatterParams) {
+        var cellValue = cell.getValue()
+        console.log(cellValue)
+        if (cellValue==true | cellValue==false){
+            return cellValue
+        } else {
+            return []
+        }
+    }},
+    {title:"Prüfer", field:"Operator", hozAlign:"center", editor:"input", resizable:true},
+    {title:"Kommentar", field:"Comment",  hozAlign:"center", editor:"input", resizable:true},
     ],
 });
