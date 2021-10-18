@@ -117,6 +117,7 @@ def getTestPackageStructure(testPackages, db):
 def formatTestsForTable(testPackages, tests, db, topTestPackageIndex=[]): 
     subPackageChildren = []
     counterID = 1
+    hierarchy = 1
     returnValue = {}
     if topTestPackageIndex in testPackages:
         tmpStartID = counterID
@@ -124,28 +125,28 @@ def formatTestsForTable(testPackages, tests, db, topTestPackageIndex=[]):
             if topTestPackage in testPackages:
                 subPackageChildren = []
                 for subTestPackage in testPackages[topTestPackage]:
-                    childs, counterID = getSubTestPackageChildren(testPackages, tests, db, topTestPackageIndex=subTestPackage, counterID=counterID)
+                    childs, counterID = getSubTestPackageChildren(testPackages, tests, db, topTestPackageIndex=subTestPackage, counterID=counterID, hierarchy=hierarchy+1)
                     if childs:
                         subPackageChildren.append(childs)
                 
             counterID += 1
-            children, counterID = getTestPackageChildren(testPackage=topTestPackage, startID=counterID, tests=tests, db=db)
-            returnValue[len(returnValue)] = {'id': tmpStartID, 'testIdent': [], 'name':getTestPackageName(topTestPackage, db), '_children': subPackageChildren+children} 
+            children, counterID = getTestPackageChildren(testPackage=topTestPackage, startID=counterID, tests=tests, db=db, hierarchy=hierarchy+1)
+            returnValue[len(returnValue)] = {'id': tmpStartID, 'testIdent': [], 'name':getTestPackageName(topTestPackage, db), 'hierarchy': hierarchy, '_children': subPackageChildren+children} 
     return returnValue, counterID
 
-def getSubTestPackageChildren(testPackages, tests, db, counterID, topTestPackageIndex=[]):
+def getSubTestPackageChildren(testPackages, tests, db, counterID, hierarchy, topTestPackageIndex=[]):
     returnValue = []
     counterID +=1
     tmpStartID = counterID
     subPackageChildren = []
     if topTestPackageIndex in testPackages:
         for subTestPackage in testPackages[topTestPackageIndex]:
-            subPackageChildren.append(getSubTestPackageChildren(testPackages, tests, db, topTestPackageIndex=subTestPackage))
-    children, counterID = getTestPackageChildren(testPackage=topTestPackageIndex, startID=counterID, tests=tests, db=db)
-    returnValue = {'id': tmpStartID, 'testIdent': [], 'name':getTestPackageName(topTestPackageIndex, db), '_children': subPackageChildren+children} 
+            subPackageChildren.append(getSubTestPackageChildren(testPackages, tests, db, topTestPackageIndex=subTestPackage, hierarchy=hierarchy+1))
+    children, counterID = getTestPackageChildren(testPackage=topTestPackageIndex, startID=counterID, tests=tests, db=db, hierarchy=hierarchy+1)
+    returnValue = {'id': tmpStartID, 'testIdent': [], 'name':getTestPackageName(topTestPackageIndex, db), 'hierarchy':hierarchy, '_children': subPackageChildren+children} 
     return returnValue, counterID
 
-def getTestPackageChildren(testPackage, startID, tests, db):
+def getTestPackageChildren(testPackage, startID, tests, db , hierarchy):
     children = []
     counterID = startID
     if testPackage in tests:
@@ -161,13 +162,15 @@ def getTestPackageChildren(testPackage, startID, tests, db):
                     "id": tmpStartID,  
                     "testIdent": testIdent,
                     "name": formattedName,
+                    'hierarchy': hierarchy,
                     "_children": ePPB
                 })
             else:
                 children.append({
                     "id": tmpStartID,  
                     "testIdent": testIdent,
-                    "name": formattedName
+                    "name": formattedName,
+                    'hierarchy': hierarchy
                 })
 
     return children, counterID
@@ -194,7 +197,8 @@ def getEPPBForTest(testIdent, counterID, db, testName, testFormattedName):
                 'Stop': data[ppb]['Stop'], 
                 'TotalTime': round(data[ppb]['TotalTime'],1), 
                 'isTestFinished': data[ppb]['isTestFinished'],
-                'Comment': data[ppb]['Comment']
+                'Comment': data[ppb]['Comment'], 
+                'hierarchy': 0
             })
     return children, counterID
 

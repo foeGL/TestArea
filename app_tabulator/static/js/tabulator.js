@@ -79,25 +79,26 @@ var table = new Tabulator("#example-nested-table", {
     {title:"Name", field:"name", formatter: function(cell, formatterParams) {
         var cellValue = cell.getValue()
         var row = cell.getRow()
-        var parent = row.getTreeParent()
-        //console.log("parent: ", row.getTreeParent())
-        if (parent==false){
-            row.getElement().style.backgroundColor = "white";
-            var cells = row.getCells()
-            for (let i=0; i<cells.length; i++){
-                if (i==0){
-                    cells[i].getElement().style.width = "auto"; // layout:"fitColumns" ist hier essentiell!!
-                }
-                if (i<cells.length-1){
-                    cells[i].getElement().style.border = "none";        
-                }  
+        //console.log("parent of "+cellValue, row.getTreeParent())
+        //console.log("children of"+cellValue, row.getTreeChildren())
+        //console.log("children.length", children.length)
+        hierarchy = row.getCell('hierarchy').getValue()
+        if (hierarchy>0){
+            if (hierarchy==1){
+                row.getElement().style.backgroundColor = "white";
+                row.getElement().style.height = "30px";
+                row.getElement().style.fontSize = "20px";
+                row.getElement().style.marginTop = "10px";
+                row.getElement().style.fontWeight = 'bold';
+            } else {
+                row.getElement().style.backgroundColor = "white";
+                row.getElement().style.height = "30px";
+                row.getElement().style.fontSize = "18px";
+                row.getElement().style.marginTop = "5px";
+                row.getElement().style.marginBottom = "5px";
+                row.getElement().style.fontWeight = 'bold';
             }
-        } else {}
-        //console.log("getTreeChildren", row.getTreeChildren())
-        if (cellValue == "hödiofha dfha isodhf aosihf iaohe ioahe iofahse iofahse iofah oiefha ief"){
-            row.getElement().style.backgroundColor = "white";
             var cells = row.getCells()
-            console.log(cells)
             for (let i=0; i<cells.length; i++){
                 if (i==0){
                     cells[i].getElement().style.width = "auto"; // layout:"fitColumns" ist hier essentiell!!
@@ -107,6 +108,7 @@ var table = new Tabulator("#example-nested-table", {
                 }  
             }
         }
+        else {}
         return cellValue
         }, width: '10px', responsive:0,resizable:true
     }, //never hide this column
@@ -133,16 +135,9 @@ var table = new Tabulator("#example-nested-table", {
         if(cellValue == 1){return 'Aufwand'}
         if(cellValue > 1){return 'Pauschale #' + (cellValue-1)}
     }},
-    {title:"Beendet", field:"isTestFinished", hozAlign:"center", editor:true, formatter:"tickCross", resizable:true, formatter: function(cell, formatterParams) {
-        var cellValue = cell.getValue()
-        console.log(cellValue)
-        if (cellValue==true | cellValue==false){
-            return cellValue
-        } else {
-            return []
-        }
-    }},
+    {title:"Beendet", field:"isTestFinished", hozAlign:"center", editor:true, formatter:"tickCross", resizable:true, formatterParams:{allowEmpty:true}},//allowTruthy:true 
     {title:"Prüfer", field:"Operator", hozAlign:"center", editor:"input", resizable:true},
     {title:"Kommentar", field:"Comment",  hozAlign:"center", editor:"input", resizable:true},
+    {title:"Hierarchy", field:"hierarchy",  hozAlign:"center", visible:0, resizable:true},
     ],
 });
