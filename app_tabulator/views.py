@@ -8,7 +8,7 @@ TestOrders = {
 
 # Create your views here.
 def index(request):    
-    numb = 1
+    numb = 0
     TestSampleIdent = TestOrders[numb]['TestSampleIdent']
     OrderIdent = TestOrders[numb]['OrderIdent']
     formattedTests = functions.getTestsOfTestSampleForSpecificOrder(TestSampleIdent=TestSampleIdent, OrderIdent=OrderIdent)

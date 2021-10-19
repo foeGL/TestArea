@@ -117,7 +117,7 @@ def getTestPackageStructure(testPackages, db):
 def formatTestsForTable(testPackages, tests, db, topTestPackageIndex=[]): 
     subPackageChildren = []
     counterID = 1
-    hierarchy = 1
+    hierarchy = 2
     returnValue = {}
     if topTestPackageIndex in testPackages:
         tmpStartID = counterID
@@ -130,7 +130,7 @@ def formatTestsForTable(testPackages, tests, db, topTestPackageIndex=[]):
                         subPackageChildren.append(childs)
                 
             counterID += 1
-            children, counterID = getTestPackageChildren(testPackage=topTestPackage, startID=counterID, tests=tests, db=db, hierarchy=hierarchy+1)
+            children, counterID = getTestPackageChildren(testPackage=topTestPackage, startID=counterID, tests=tests, db=db)
             returnValue[len(returnValue)] = {'id': tmpStartID, 'testIdent': [], 'name':getTestPackageName(topTestPackage, db), 'hierarchy': hierarchy, '_children': subPackageChildren+children} 
     return returnValue, counterID
 
@@ -142,11 +142,11 @@ def getSubTestPackageChildren(testPackages, tests, db, counterID, hierarchy, top
     if topTestPackageIndex in testPackages:
         for subTestPackage in testPackages[topTestPackageIndex]:
             subPackageChildren.append(getSubTestPackageChildren(testPackages, tests, db, topTestPackageIndex=subTestPackage, hierarchy=hierarchy+1))
-    children, counterID = getTestPackageChildren(testPackage=topTestPackageIndex, startID=counterID, tests=tests, db=db, hierarchy=hierarchy+1)
+    children, counterID = getTestPackageChildren(testPackage=topTestPackageIndex, startID=counterID, tests=tests, db=db)
     returnValue = {'id': tmpStartID, 'testIdent': [], 'name':getTestPackageName(topTestPackageIndex, db), 'hierarchy':hierarchy, '_children': subPackageChildren+children} 
     return returnValue, counterID
 
-def getTestPackageChildren(testPackage, startID, tests, db , hierarchy):
+def getTestPackageChildren(testPackage, startID, tests, db):
     children = []
     counterID = startID
     if testPackage in tests:
@@ -162,7 +162,7 @@ def getTestPackageChildren(testPackage, startID, tests, db , hierarchy):
                     "id": tmpStartID,  
                     "testIdent": testIdent,
                     "name": formattedName,
-                    'hierarchy': hierarchy,
+                    'hierarchy': 0,
                     "_children": ePPB
                 })
             else:
@@ -170,7 +170,7 @@ def getTestPackageChildren(testPackage, startID, tests, db , hierarchy):
                     "id": tmpStartID,  
                     "testIdent": testIdent,
                     "name": formattedName,
-                    'hierarchy': hierarchy
+                    'hierarchy': 0
                 })
 
     return children, counterID
@@ -198,7 +198,7 @@ def getEPPBForTest(testIdent, counterID, db, testName, testFormattedName):
                 'TotalTime': round(data[ppb]['TotalTime'],1), 
                 'isTestFinished': data[ppb]['isTestFinished'],
                 'Comment': data[ppb]['Comment'], 
-                'hierarchy': 0
+                'hierarchy': 1
             })
     return children, counterID
 
@@ -215,6 +215,7 @@ def addTestsWithoutTestPackages(returnValue, tests, counterID, testPackage):
                 "id": counterID,  
                 "testIdent":tests[testPackage][test]['TestIdent'],
                 "name": f"{name} - {tests[testPackage][test]['Description']}",
+                'history': 0
             }
     return returnValue
 

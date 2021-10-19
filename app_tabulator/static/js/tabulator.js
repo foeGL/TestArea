@@ -63,6 +63,7 @@ var dateEditor = function(cell, onRendered, success, cancel, editorParams){
 // http://tabulator.info/docs/4.9/tree
 
 var table = new Tabulator("#example-nested-table", {
+    backgroundColor: "#efefef",
     width: "10px",
     dataTree:true,
     //dataTreeChildField:"childRows", //look for the child row data array in the childRows field -- only the top-tier rows
@@ -82,22 +83,33 @@ var table = new Tabulator("#example-nested-table", {
         //console.log("parent of "+cellValue, row.getTreeParent())
         //console.log("children of"+cellValue, row.getTreeChildren())
         //console.log("children.length", children.length)
-        hierarchy = row.getCell('hierarchy').getValue()
-        if (hierarchy>0){
-            if (hierarchy==1){
+        var hierarchy = row.getCell('hierarchy').getValue()
+        switch(hierarchy){
+            case 0: //PPB
+                row.getElement().style.fontWeight = 'bold';
+                break;
+            case 1: //TE
                 row.getElement().style.backgroundColor = "white";
+                break;
+            case 2: //1.Überschrift
                 row.getElement().style.height = "30px";
                 row.getElement().style.fontSize = "20px";
                 row.getElement().style.marginTop = "10px";
                 row.getElement().style.fontWeight = 'bold';
-            } else {
-                row.getElement().style.backgroundColor = "white";
+                break;
+            case 3: //2. Überschrift
                 row.getElement().style.height = "30px";
                 row.getElement().style.fontSize = "18px";
                 row.getElement().style.marginTop = "5px";
                 row.getElement().style.marginBottom = "5px";
                 row.getElement().style.fontWeight = 'bold';
-            }
+                break;
+            case 4: //3. Überschrift
+                break;
+            default:
+                break;
+        }
+        if (hierarchy != 1){
             var cells = row.getCells()
             for (let i=0; i<cells.length; i++){
                 if (i==0){
@@ -108,7 +120,6 @@ var table = new Tabulator("#example-nested-table", {
                 }  
             }
         }
-        else {}
         return cellValue
         }, width: '10px', responsive:0,resizable:true
     }, //never hide this column
