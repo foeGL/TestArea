@@ -63,65 +63,25 @@ var dateEditor = function(cell, onRendered, success, cancel, editorParams){
 // http://tabulator.info/docs/4.9/tree
 
 var table = new Tabulator("#example-nested-table", {
-    backgroundColor: "#efefef",
-    width: "10px",
+    backgroundColor:"#efefef",
+    minHeight:"300px",
+    width:"500px",
     dataTree:true,
     //dataTreeChildField:"childRows", //look for the child row data array in the childRows field -- only the top-tier rows
     //minheight:"100px",
     data:tableDataNested,
     dataTreeStartExpanded:true,
-    layout:"fitColumns",      //fit columns to width of table
+    layout:"fitDataStretch",      //fit columns to width of table
     /*
     dataTreeStartExpanded:function(row, level){
         return row.getData().driver; //expand rows where the "driver" data field is true;
     },
     */
+
     columns:[
     {title:"Name", field:"name", formatter: function(cell, formatterParams) {
-        var cellValue = cell.getValue()
-        var row = cell.getRow()
-        //console.log("parent of "+cellValue, row.getTreeParent())
-        //console.log("children of"+cellValue, row.getTreeChildren())
-        //console.log("children.length", children.length)
-        var hierarchy = row.getCell('hierarchy').getValue()
-        switch(hierarchy){
-            case 0: //PPB
-                row.getElement().style.fontWeight = 'bold';
-                break;
-            case 1: //TE
-                row.getElement().style.backgroundColor = "white";
-                break;
-            case 2: //1.Überschrift
-                row.getElement().style.height = "30px";
-                row.getElement().style.fontSize = "20px";
-                row.getElement().style.marginTop = "10px";
-                row.getElement().style.fontWeight = 'bold';
-                break;
-            case 3: //2. Überschrift
-                row.getElement().style.height = "30px";
-                row.getElement().style.fontSize = "18px";
-                row.getElement().style.marginTop = "5px";
-                row.getElement().style.marginBottom = "5px";
-                row.getElement().style.fontWeight = 'bold';
-                break;
-            case 4: //3. Überschrift
-                break;
-            default:
-                break;
-        }
-        if (hierarchy != 1){
-            var cells = row.getCells()
-            for (let i=0; i<cells.length; i++){
-                if (i==0){
-                    cells[i].getElement().style.width = "auto"; // layout:"fitColumns" ist hier essentiell!!
-                }
-                if (i<cells.length-1){
-                    cells[i].getElement().style.border = "none";        
-                }  
-            }
-        }
-        return cellValue
-        }, width: '10px', responsive:0,resizable:true
+        return formatRow(cell)
+        }, width: "8px"
     }, //never hide this column
     /*
     {title:"Location", field:"location", width:150},
@@ -136,19 +96,83 @@ var table = new Tabulator("#example-nested-table", {
     {title:"TestIdent", field:"TestIdent", hozAlign:"center", visible:0, resizable:true},
     {title:"Prüfung_Voll", field:"TestNameFull", hozAlign:"center", visible:0},
     {title:"Abgerechnet", field:"Invoice", hozAlign:"center", formatter:"tickCross", visible:0},
-    {title:"Datum", field:"Date",  hozAlign:"center", resizable:true,  editor:dateEditor},
-    {title:"Start", field:"Start",  hozAlign:"center", resizable:true,  editor:dateEditor},
-    {title:"Stop", field:"Stop",  hozAlign:"center", resizable:true,  editor:dateEditor},
-    {title:"Gesamtzeit", field:"TotalTime",  hozAlign:"center", resizable:true},
+    {title:"Datum", field:"Date",  hozAlign:"center", resizable:true,  editor:dateEditor, width: "5px"},
+    {title:"Start", field:"Start",  hozAlign:"center", resizable:true,  editor:dateEditor, width: "5px"},
+    {title:"Stop", field:"Stop",  hozAlign:"center", resizable:true,  editor:dateEditor, width: "5px"},
+    {title:"Gesamtzeit", field:"TotalTime",  hozAlign:"center", resizable:true, width: "5px"},
     {title:"Abrechnungsart", field:"InvoiceType",  hozAlign:"center", resizable:true, editor:"select", editorParams:{}, formatter: function(cell, formatterParams) {
         var cellValue = cell.getValue()
         if(cellValue == 0){return 'Nicht abrechnen'}
         if(cellValue == 1){return 'Aufwand'}
         if(cellValue > 1){return 'Pauschale #' + (cellValue-1)}
-    }},
-    {title:"Beendet", field:"isTestFinished", hozAlign:"center", editor:true, formatter:"tickCross", resizable:true, formatterParams:{allowEmpty:true}},//allowTruthy:true 
-    {title:"Prüfer", field:"Operator", hozAlign:"center", editor:"input", resizable:true},
-    {title:"Kommentar", field:"Comment",  hozAlign:"center", editor:"input", resizable:true},
-    {title:"Hierarchy", field:"hierarchy",  hozAlign:"center", visible:0, resizable:true},
+    }, width: "10px"},
+    {title:"Beendet", field:"isTestFinished", hozAlign:"center", editor:true, formatter:"tickCross", resizable:true, formatterParams:{allowEmpty:true}, width: "3px"},//allowTruthy:true 
+    {title:"Prüfer", field:"Operator", hozAlign:"center", editor:"input", resizable:true, width: "3px"},
+    {title:"Kommentar", field:"Comment",  hozAlign:"center", editor:"input", resizable:true, width: "10px"},
+    {title:"Element", field:"element",  hozAlign:"center", visible:0, resizable:true},
+    {title:"TreeLevel", field:"treeLevel",  hozAlign:"center", visible:0, resizable:true},
     ],
 });
+
+function formatRow(cell){    
+    var cellValue = cell.getValue()
+    var row = cell.getRow()
+    var element = row.getCell('element').getValue()
+    var treeLevel = row.getCell('treeLevel').getValue()
+    switch(treeLevel){
+        case 0:         
+            row.getElement().style.paddingTop = "5px";
+            row.getElement().style.paddingLeft = "4px";
+            break;
+        case 2:
+            row.getElement().style.paddingLeft = "2px";
+            break;
+        case 3:
+            row.getElement().style.paddingLeft = "4px";
+            break;
+        default:
+            break;
+    }
+    switch(element){
+        case 'Header': //1.Überschrift
+            switch(treeLevel){
+                case 0:
+                    row.getElement().style.height = "35px";
+                    row.getElement().style.fontSize = "20px";
+                    row.getElement().style.fontWeight = 'bold';
+                    break;
+                case 1: //2. Überschrift
+                    row.getElement().style.height = "30px";
+                    row.getElement().style.fontSize = "18px";
+                    row.getElement().style.paddingBottom = "5px";
+                    row.getElement().style.fontWeight = 'bold';
+                    break;
+                case 4: //3. Überschrift
+                    break;
+                default:
+                    break;
+            }
+            break;
+        case 'Test':
+            row.getElement().style.paddingTop = "3px";
+            row.getElement().style.fontWeight = 'bold';
+            break;
+        case 'PPB':
+            row.getElement().style.backgroundColor = "white";
+            break;
+        default:
+            break;
+    }
+    if (element != 'PPB'){
+        var cells = row.getCells()
+        for (let i=0; i<cells.length; i++){
+            if (i==0){
+                cells[i].getElement().style.width = "100%"; // layout:"fitColumns" ist hier essentiell!!
+            }
+            if (i<cells.length-1){
+                cells[i].getElement().style.border = "none";        
+            }  
+        }
+    }
+    return cellValue
+}

@@ -6,12 +6,9 @@ def getTestsOfTestSampleForSpecificOrder(TestSampleIdent, OrderIdent):
     tests = getTestsByTestIdentsForOrder(TestIdents=allTestIdentsForTestSample, OrderIdent=OrderIdent, db=db)    
     tests = addTestPackageIdentsToTest(tests=tests, db=db)
     testPackages = list(tests.keys())
-    testPackageStructure = getTestPackageStructure(testPackages=testPackages, db=db)
-    #linkedTestPackages = getLinkedTestPackages() # <==============================================================================================
-    
+    testPackageStructure = getTestPackageStructure(testPackages=testPackages, db=db)    
     formattedTests, counterID = formatTestsForTable(tests=tests, testPackages=testPackageStructure, topTestPackageIndex='', db=db)    
     formattedTests = addTestsWithoutTestPackages(returnValue=formattedTests, tests=tests, counterID=counterID, testPackage='')
-    print(formattedTests)
     sql_db.closeDB(db)
     return formattedTests
 
@@ -117,7 +114,7 @@ def getTestPackageStructure(testPackages, db):
 def formatTestsForTable(testPackages, tests, db, topTestPackageIndex=[]): 
     subPackageChildren = []
     counterID = 1
-    hierarchy = 2
+    treeLevel = 0
     returnValue = {}
     if topTestPackageIndex in testPackages:
         tmpStartID = counterID
@@ -125,28 +122,40 @@ def formatTestsForTable(testPackages, tests, db, topTestPackageIndex=[]):
             if topTestPackage in testPackages:
                 subPackageChildren = []
                 for subTestPackage in testPackages[topTestPackage]:
-                    childs, counterID = getSubTestPackageChildren(testPackages, tests, db, topTestPackageIndex=subTestPackage, counterID=counterID, hierarchy=hierarchy+1)
+                    childs, counterID = getSubTestPackageChildren(testPackages, tests, db, topTestPackageIndex=subTestPackage, counterID=counterID, treeLevel=treeLevel+1)
                     if childs:
                         subPackageChildren.append(childs)
                 
             counterID += 1
-            children, counterID = getTestPackageChildren(testPackage=topTestPackage, startID=counterID, tests=tests, db=db)
-            returnValue[len(returnValue)] = {'id': tmpStartID, 'testIdent': [], 'name':getTestPackageName(topTestPackage, db), 'hierarchy': hierarchy, '_children': subPackageChildren+children} 
+            children, counterID = getTestPackageChildren(testPackage=topTestPackage, startID=counterID, tests=tests, db=db, treeLevel=treeLevel+1)
+            returnValue[len(returnValue)] = {
+                'id': tmpStartID, 
+                'testIdent': [], 
+                'name':getTestPackageName(topTestPackage, db),          
+                'element': 'Header',
+                'treeLevel': treeLevel,
+                '_children': subPackageChildren+children} 
     return returnValue, counterID
 
-def getSubTestPackageChildren(testPackages, tests, db, counterID, hierarchy, topTestPackageIndex=[]):
+def getSubTestPackageChildren(testPackages, tests, db, counterID, treeLevel, topTestPackageIndex=[]):
     returnValue = []
     counterID +=1
     tmpStartID = counterID
     subPackageChildren = []
     if topTestPackageIndex in testPackages:
         for subTestPackage in testPackages[topTestPackageIndex]:
-            subPackageChildren.append(getSubTestPackageChildren(testPackages, tests, db, topTestPackageIndex=subTestPackage, hierarchy=hierarchy+1))
-    children, counterID = getTestPackageChildren(testPackage=topTestPackageIndex, startID=counterID, tests=tests, db=db)
-    returnValue = {'id': tmpStartID, 'testIdent': [], 'name':getTestPackageName(topTestPackageIndex, db), 'hierarchy':hierarchy, '_children': subPackageChildren+children} 
+            subPackageChildren.append(getSubTestPackageChildren(testPackages, tests, db, topTestPackageIndex=subTestPackage, treeLevel=treeLevel+1))
+    children, counterID = getTestPackageChildren(testPackage=topTestPackageIndex, startID=counterID, tests=tests, db=db, treeLevel=treeLevel+1)
+    returnValue = {
+        'id': tmpStartID, 
+        'testIdent': [], 
+        'name':getTestPackageName(topTestPackageIndex, db),            
+        'element': 'Header',
+        'treeLevel': treeLevel,
+        '_children': subPackageChildren+children} 
     return returnValue, counterID
 
-def getTestPackageChildren(testPackage, startID, tests, db):
+def getTestPackageChildren(testPackage, startID, tests, db, treeLevel):
     children = []
     counterID = startID
     if testPackage in tests:
@@ -156,26 +165,27 @@ def getTestPackageChildren(testPackage, startID, tests, db):
             testIdent = tests[testPackage][test]['TestIdent']
             name = f"TE{'{0:0=2d}'.format(tests[testPackage][test]['TestNumber'])}"
             formattedName = f"{name} - {tests[testPackage][test]['Description']}"
-            ePPB, counterID = getEPPBForTest(testIdent=testIdent, counterID=counterID, db=db, testName=name, testFormattedName=formattedName)
+            ePPB, counterID = getEPPBForTest(testIdent=testIdent, counterID=counterID, db=db, testName=name, testFormattedName=formattedName, treeLevel=treeLevel+1)
             if ePPB:
                 children.append({
                     "id": tmpStartID,  
                     "testIdent": testIdent,
-                    "name": formattedName,
-                    'hierarchy': 0,
+                    "name": formattedName,           
+                    'element': 'Test',
+                    'treeLevel': treeLevel,
                     "_children": ePPB
                 })
             else:
                 children.append({
                     "id": tmpStartID,  
                     "testIdent": testIdent,
-                    "name": formattedName,
-                    'hierarchy': 0
+                    "name": formattedName,           
+                    'element': 'Test',
+                    'treeLevel': treeLevel
                 })
-
     return children, counterID
 
-def getEPPBForTest(testIdent, counterID, db, testName, testFormattedName):
+def getEPPBForTest(testIdent, counterID, db, testName, testFormattedName, treeLevel):
     table="TCPD_WebGUI"
     where = f"TestIdent={testIdent}"
     order_by = {'Date':'ASC', 'Start': 'ASC'}
@@ -197,14 +207,11 @@ def getEPPBForTest(testIdent, counterID, db, testName, testFormattedName):
                 'Stop': data[ppb]['Stop'], 
                 'TotalTime': round(data[ppb]['TotalTime'],1), 
                 'isTestFinished': data[ppb]['isTestFinished'],
-                'Comment': data[ppb]['Comment'], 
-                'hierarchy': 1
+                'Comment': data[ppb]['Comment'],                 
+                'element': 'PPB',
+                'treeLevel': treeLevel
             })
     return children, counterID
-
-
-
-
 
 def addTestsWithoutTestPackages(returnValue, tests, counterID, testPackage):
     if testPackage in tests:
@@ -215,144 +222,7 @@ def addTestsWithoutTestPackages(returnValue, tests, counterID, testPackage):
                 "id": counterID,  
                 "testIdent":tests[testPackage][test]['TestIdent'],
                 "name": f"{name} - {tests[testPackage][test]['Description']}",
-                'history': 0
+                'element': 'Test',
+                'treeLevel': 0
             }
     return returnValue
-
-def getTestData():
-    print("starte")
-    tests = {
-        2136: {
-            'name': 'TE01',
-            'formatted': 'TE01 - 47 CFR Part 15 - CE [Geleitete Störgrößen] [0,15 - 30 MHz][#38]',
-            'standard': '47 CFR Part 15 Subpart B'}, 
-        2137: {
-            'name': 'TE02',
-            'formatted': 'TE02 - 47 CFR Part 15 - RE [E-Feld][Vormessung SAC 3m][30 - 1000 MHz][#27]',
-            'standard': '47 CFR Part 15 Subpart B'},
-        2138: {
-            'name': 'TE03',
-            'formatted': 'TE03 - 47 CFR Part 15 - RE [E-Feld][Nachmessung OATS 10m][30 - 1000 MHz][#27]',
-            'standard': '47 CFR Part 15 Subpart B'},
-        2139: {
-            'name': 'TE04',
-            'formatted': 'TE04 - 47 CFR Part 15 - RE [E-Feld][SAC 3m][1 - 5 GHz][#27]',
-            'standard': '47 CFR Part 15 Subpart B'},
-        2140: {
-            'name': 'TE05',
-            'formatted': 'TE05 - 47 CFR Part 15 - Zulassungsverfahren Certification CAB/USA [#38]',
-            'standard': '47 CFR Part 15 Subpart B'},
-        2141: {
-            'name': 'TE06',
-            'formatted': 'TE06 - 47 CFR Part 15 - Zulassungskosten TCB - nach Aufwand [#38]',
-            'standard': '47 CFR Part 15 Subpart B'},
-        2142: {
-            'name': 'TE07',
-            'formatted': 'TE07 - Ergebnisbericht nach DIN EN ISO/IEC 17025:2018-03 - FCC - englisch',
-            'standard': ''
-            }
-        }
-
-
-    tableData = {
-        0: {
-            'ProtocolIdent': 684,
-            'TestIdent': 2136,
-            'OrderIdent': 448,
-            'Operator': 'sv',
-            'PersonelIdent': 7279, 
-            'Date': '2021-10-06',
-            'Start': '08:30',
-            'Stop': '12:00',
-            'TotalTime': 3.5,
-            'InvoiceType': 1,
-            'InvoiceStatus': '',
-            'isTestFinished': True,
-            'Comment': ''},
-        1: {
-            'ProtocolIdent': 685,
-            'TestIdent': 2137,
-            'OrderIdent': 448,
-            'Operator': 'sv',
-            'PersonelIdent': 7279,
-            'Date': '2021-10-06',
-            'Start': '14:45',
-            'Stop': '16:30',
-            'TotalTime': 2.0,
-            'InvoiceType': 1,
-            'InvoiceStatus': '',
-            'isTestFinished': True,
-            'Comment': ''},
-        2: {
-            'ProtocolIdent': 695,
-            'TestIdent': 2138,
-            'OrderIdent': 448,
-            'Operator': 'sv',
-            'PersonelIdent': 7279,
-            'Date': '2021-10-07',
-            'Start': '10:00',
-            'Stop': '11:00',
-            'TotalTime': 1.0,
-            'InvoiceType': 1,
-            'InvoiceStatus': '',
-            'isTestFinished': False,
-            'Comment': 'Aufbau'},
-        3: {
-            'ProtocolIdent': 704,
-            'TestIdent': 2138,
-            'OrderIdent': 448,
-            'Operator': 'sv',
-            'PersonelIdent': 7279,
-            'Date': '2021-10-07',
-            'Start': '11:00',
-            'Stop': '12:00',
-            'TotalTime': 1.0,
-            'InvoiceType': 1,
-            'InvoiceStatus': '',
-            'isTestFinished': False,
-            'Comment': ''},
-        4: {
-            'ProtocolIdent': 705,
-            'TestIdent': 2138,
-            'OrderIdent': 448,
-            'Operator': 'sv',
-            'PersonelIdent': 7279,
-            'Date': '2021-10-07',
-            'Start': '13:00',
-            'Stop': '14:30',
-            'TotalTime': 1.5,
-            'InvoiceType': 1,
-            'InvoiceStatus': '',
-            'isTestFinished': True,
-            'Comment': ''},
-        5: {
-            'ProtocolIdent': 687,
-            'TestIdent': 2139,
-            'OrderIdent': 448,
-            'Operator': 'sv',
-            'PersonelIdent': 7279,
-            'Date': '2021-10-06',
-            'Start': '17:00',
-            'Stop': '17:50',
-            'TotalTime': 1.0,
-            'InvoiceType': 1,
-            'InvoiceStatus': '',
-            'isTestFinished': True,
-            'Comment': ''},
-        6: {
-            'ProtocolIdent': 750,
-            'TestIdent': 2142,
-            'OrderIdent': 448,
-            'Operator': 'sv',
-            'PersonelIdent': 7279,
-            'Date': '2021-10-11',
-            'Start': '00:00',
-            'Stop': '00:00',
-            'TotalTime': 0.0,
-            'InvoiceType': 0,
-            'InvoiceStatus': '',
-            'isTestFinished': False,
-            'Comment': ''}
-        }
-
-    return tests, tableData
