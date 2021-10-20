@@ -1,4 +1,5 @@
 from django_project import sql_db
+import datetime
 
 def getTestsOfTestSampleForSpecificOrder(TestSampleIdent, OrderIdent):
     db = sql_db.openDB()
@@ -132,7 +133,7 @@ def formatTestsForTable(testPackages, tests, db, topTestPackageIndex=[]):
                 'id': tmpStartID, 
                 'testIdent': [], 
                 'name':getTestPackageName(topTestPackage, db),          
-                'element': 'Header',
+                'element': 'header',
                 'treeLevel': treeLevel,
                 '_children': subPackageChildren+children} 
     return returnValue, counterID
@@ -150,7 +151,7 @@ def getSubTestPackageChildren(testPackages, tests, db, counterID, treeLevel, top
         'id': tmpStartID, 
         'testIdent': [], 
         'name':getTestPackageName(topTestPackageIndex, db),            
-        'element': 'Header',
+        'element': 'header',
         'treeLevel': treeLevel,
         '_children': subPackageChildren+children} 
     return returnValue, counterID
@@ -171,7 +172,7 @@ def getTestPackageChildren(testPackage, startID, tests, db, treeLevel):
                     "id": tmpStartID,  
                     "testIdent": testIdent,
                     "name": formattedName,           
-                    'element': 'Test',
+                    'element': 'test',
                     'treeLevel': treeLevel,
                     "_children": ePPB
                 })
@@ -180,7 +181,7 @@ def getTestPackageChildren(testPackage, startID, tests, db, treeLevel):
                     "id": tmpStartID,  
                     "testIdent": testIdent,
                     "name": formattedName,           
-                    'element': 'Test',
+                    'element': 'test',
                     'treeLevel': treeLevel
                 })
     return children, counterID
@@ -208,7 +209,7 @@ def getEPPBForTest(testIdent, counterID, db, testName, testFormattedName, treeLe
                 'TotalTime': round(data[ppb]['TotalTime'],1), 
                 'isTestFinished': data[ppb]['isTestFinished'],
                 'Comment': data[ppb]['Comment'],                 
-                'element': 'PPB',
+                'element': 'ppb',
                 'treeLevel': treeLevel
             })
     return children, counterID
@@ -222,7 +223,13 @@ def addTestsWithoutTestPackages(returnValue, tests, counterID, testPackage):
                 "id": counterID,  
                 "testIdent":tests[testPackage][test]['TestIdent'],
                 "name": f"{name} - {tests[testPackage][test]['Description']}",
-                'element': 'Test',
+                'element': 'test',
                 'treeLevel': 0
             }
     return returnValue
+
+
+
+def getTestValues():
+    data = {0: {'id': 1, 'testIdent': [], 'name': 'DIN EN IEC 61000-6-4:2020-09 [#37]', 'element': 'header', 'treeLevel': 0, '_children': [{'id': 3, 'testIdent': 2484, 'name': 'TE01 - DIN EN IEC 61000-6-4:2020-09 - CE [Unsym. Spannungen / LISN] [0,15 - 30 MHz][#37]', 'element': 'test', 'treeLevel': 1}, {'id': 4, 'testIdent': 2485, 'name': 'TE02 - DIN EN 55032:2016-02 - CE [Asym. Spannungen / Telekommikationsanschluss] [0,15 - 30 MHz][#37]', 'element': 'test', 'treeLevel': 1}, {'id': 5, 'testIdent': 2486, 'name': 'TE03 - DIN EN IEC 61000-6-4:2020-09 - RE [gestrahlte Störgrößen][30 - 1000 MHz][#37]', 'element': 'test', 'treeLevel': 1}, {'id': 6, 'testIdent': 2487, 'name': 'TE04 - DIN EN IEC 61000-6-4:2020-09  - RE [gestrahlte Störgrößen] [1 - 6 GHz][#37]', 'element': 'test', 'treeLevel': 1}]}, 1: {'id': 1, 'testIdent': [], 'name': 'DIN EN IEC 61000-6-2:2019-11 [#5]', 'element': 'header', 'treeLevel': 0, '_children': [{'id': 8, 'testIdent': 2488, 'name': 'TE05 - DIN EN 61000-4-2:2009-12 - CI [elektrostatische Entladung][#5]', 'element': 'test', 'treeLevel': 1}, {'id': 9, 'testIdent': 2489, 'name': 'TE06 - DIN EN 61000-4-3:2011-04 - RI [gestrahlte Störgrößen][80 - 1000 MHz][#5]', 'element': 'test', 'treeLevel': 1, '_children': [{'id': 10, 'ProtocolIdent': 883, 'TestIdent': 2489, 'name': 'TE06', 'Operator': 'sv', 'InvoiceType': 1, 'Date': datetime.date(2021, 10, 20), 'Start': datetime.time(11, 30), 'Stop': datetime.time(12, 0), 'TotalTime': 0.5, 'isTestFinished': False, 'Comment': '', 'element': 'ppb', 'treeLevel': 2}, {'id': 11, 'ProtocolIdent': 884, 'TestIdent': 2489, 'name': 'TE06', 'Operator': 'sv', 'InvoiceType': 1, 'Date': datetime.date(2021, 10, 20), 'Start': datetime.time(12, 30), 'Stop': datetime.time(14, 0), 'TotalTime': 1.5, 'isTestFinished': True, 'Comment': '', 'element': 'ppb', 'treeLevel': 2}]}, {'id': 12, 'testIdent': 2490, 'name': 'TE07 - DIN EN 61000-4-3:2011-04 - RI [gestrahlte Störgrößen][1,4 - 6 GHz][#5]', 'element': 'test', 'treeLevel': 1, '_children': [{'id': 13, 'ProtocolIdent': 866, 'TestIdent': 2490, 'name': 'TE07', 'Operator': 'sv', 'InvoiceType': 1, 'Date': datetime.date(2021, 10, 20), 'Start': datetime.time(9, 0), 'Stop': datetime.time(11, 30), 'TotalTime': 2.5, 'isTestFinished': True, 'Comment': '', 'element': 'ppb', 'treeLevel': 2}]}, {'id': 14, 'testIdent': 2491, 'name': 'TE08 - DIN EN 61000-4-4:2013-04 - CI [EFT][DC][#5]', 'element': 'test', 'treeLevel': 1, '_children': [{'id': 15, 'ProtocolIdent': 902, 'TestIdent': 2491, 'name': 'TE08', 'Operator': 'sv', 'InvoiceType': 1, 'Date': datetime.date(2021, 10, 20), 'Start': datetime.time(17, 0), 'Stop': datetime.time(17, 30), 'TotalTime': 0.5, 'isTestFinished': True, 'Comment': '', 'element': 'ppb', 'treeLevel': 2}]}, {'id': 16, 'testIdent': 2492, 'name': 'TE09 - DIN EN 61000-4-4:2013-04 - CI [EFT][Signalleitung][#5]', 'element': 'test', 'treeLevel': 1, '_children': [{'id': 17, 'ProtocolIdent': 903, 'TestIdent': 2492, 'name': 'TE09', 'Operator': 'sv', 'InvoiceType': 1, 'Date': datetime.date(2021, 10, 20), 'Start': datetime.time(17, 45), 'Stop': datetime.time(18, 0), 'TotalTime': 0.5, 'isTestFinished': True, 'Comment': '', 'element': 'ppb', 'treeLevel': 2}]}, {'id': 18, 'testIdent': 2493, 'name': 'TE10 - DIN EN 61000-4-5:2015-03 - CI [Surge][DC unsym.][#5]', 'element': 'test', 'treeLevel': 1, '_children': [{'id': 19, 'ProtocolIdent': 905, 'TestIdent': 2493, 'name': 'TE10', 'Operator': 'sv', 'InvoiceType': 1, 'Date': datetime.date(2021, 10, 20), 'Start': datetime.time(19, 0), 'Stop': datetime.time(19, 15), 'TotalTime': 0.5, 'isTestFinished': True, 'Comment': '', 'element': 'ppb', 'treeLevel': 2}]}, {'id': 20, 'testIdent': 2494, 'name': 'TE11 - DIN EN 61000-4-5:2015-03 - CI [Surge][DC sym.][#5]', 'element': 'test', 'treeLevel': 1, '_children': [{'id': 21, 'ProtocolIdent': 904, 'TestIdent': 2494, 'name': 'TE11', 'Operator': 'sv', 'InvoiceType': 1, 'Date': datetime.date(2021, 10, 20), 'Start': datetime.time(18, 30), 'Stop': datetime.time(19, 0), 'TotalTime': 0.5, 'isTestFinished': True, 'Comment': '', 'element': 'ppb', 'treeLevel': 2}]}, {'id': 22, 'testIdent': 2495, 'name': 'TE12 - DIN EN 61000-4-5:2015-03 - CI [Surge][Signalleitung unsym.][#5]', 'element': 'test', 'treeLevel': 1, '_children': [{'id': 23, 'ProtocolIdent': 906, 'TestIdent': 2495, 'name': 'TE12', 'Operator': 'sv', 'InvoiceType': 1, 'Date': datetime.date(2021, 10, 20), 'Start': datetime.time(19, 15), 'Stop': datetime.time(19, 30), 'TotalTime': 0.5, 'isTestFinished': True, 'Comment': '', 'element': 'ppb', 'treeLevel': 2}]}, {'id': 24, 'testIdent': 2496, 'name': 'TE13 - DIN EN 61000-4-6:2014-08 - CI [geleitete Störgrößen][DC Supply][#5]', 'element': 'test', 'treeLevel': 1, '_children': [{'id': 25, 'ProtocolIdent': 889, 'TestIdent': 2496, 'name': 'TE13', 'Operator': 'sv', 'InvoiceType': 1, 'Date': datetime.date(2021, 10, 20), 'Start': datetime.time(15, 0), 'Stop': datetime.time(15, 45), 'TotalTime': 1.0, 'isTestFinished': True, 'Comment': '', 'element': 'ppb', 'treeLevel': 2}]}, {'id': 26, 'testIdent': 2497, 'name': 'TE14 - DIN EN 61000-4-6:2014-08 - CI [geleitete Störgrößen][Signalleitung][#5]', 'element': 'test', 'treeLevel': 1, '_children': [{'id': 27, 'ProtocolIdent': 890, 'TestIdent': 2497, 'name': 'TE14', 'Operator': 'sv', 'InvoiceType': 1, 'Date': datetime.date(2021, 10, 20), 'Start': datetime.time(15, 50), 'Stop': datetime.time(16, 45), 'TotalTime': 1.0, 'isTestFinished': True, 'Comment': '', 'element': 'ppb', 'treeLevel': 2}]}, {'id': 28, 'testIdent': 2498, 'name': 'TE15 - Monitoring', 'element': 'test', 'treeLevel': 1}]}, 2: {'id': 29, 'testIdent': 2499, 'name': 'TE16 - Ergebnisbericht nach DIN EN ISO/IEC 17025:2018-03 - EN - englisch', 'element': 'test', 'treeLevel': 0}}
+    return data

@@ -7,10 +7,10 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
     </head>
     <body>
-        <div id="example-table"></div>        
-        
-        <div id="example-nested-table"></div>  
         {{tests|json_script:"tests"}}
+        <script src="{% static 'js/tablestyle.js' %}"></script>
+          
+        <div id="example-nested-table" style="margin-top: 200px;"></div>  
         <script src="{% static 'js/tabulator.js' %}"></script>
     </body>
 </htmL>

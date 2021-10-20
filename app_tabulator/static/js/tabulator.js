@@ -1,11 +1,15 @@
+/*
 const array_tests = JSON.parse(document.getElementById('tests').textContent);
 
 var tableDataNested = []        
 for (const [key1, arr] of Object.entries(array_tests)){
     tableDataNested.push(arr)
 }
-
+*/
 console.log("tableDataNested", tableDataNested)
+
+
+
 
 
 
@@ -67,31 +71,14 @@ var table = new Tabulator("#example-nested-table", {
     minHeight:"300px",
     width:"500px",
     dataTree:true,
-    //dataTreeChildField:"childRows", //look for the child row data array in the childRows field -- only the top-tier rows
-    //minheight:"100px",
     data:tableDataNested,
     dataTreeStartExpanded:true,
     layout:"fitDataStretch",      //fit columns to width of table
-    /*
-    dataTreeStartExpanded:function(row, level){
-        return row.getData().driver; //expand rows where the "driver" data field is true;
-    },
-    */
-
     columns:[
     {title:"Name", field:"name", formatter: function(cell, formatterParams) {
         return formatRow(cell)
         }, width: "8px"
     }, //never hide this column
-    /*
-    {title:"Location", field:"location", width:150},
-    {title:"Gender", field:"gender", width:150, responsive:2}, //hide this column first
-    {title:"Favourite Color", field:"col", width:150},
-    {title:"Date Of Birth", field:"dob", hozAlign:"center", sorter:"date", width:150},
-    {title:"Driver", field:"driver", width:150},
-    */
-    //{title:"TestIdent", field:"id", hozAlign:"center", visible:0,  resizable:false},
-    //{title:"Norm", field:"Norm", hozAlign:"center", visible:0},        
     {title:"ProtocolIdent", field:"ProtocolIdent", hozAlign:"center", visible:0,  resizable:true},
     {title:"TestIdent", field:"TestIdent", hozAlign:"center", visible:0, resizable:true},
     {title:"Prüfung_Voll", field:"TestNameFull", hozAlign:"center", visible:0},
@@ -134,7 +121,7 @@ function formatRow(cell){
             break;
     }
     switch(element){
-        case 'Header': //1.Überschrift
+        case 'header': //1.Überschrift
             switch(treeLevel){
                 case 0:
                     row.getElement().style.height = "35px";
@@ -153,17 +140,17 @@ function formatRow(cell){
                     break;
             }
             break;
-        case 'Test':
+        case 'test':
             row.getElement().style.paddingTop = "3px";
             row.getElement().style.fontWeight = 'bold';
             break;
-        case 'PPB':
+        case 'ppb':
             row.getElement().style.backgroundColor = "white";
             break;
         default:
             break;
     }
-    if (element != 'PPB'){
+    if (element != 'ppb'){
         var cells = row.getCells()
         for (let i=0; i<cells.length; i++){
             if (i==0){
