@@ -1,0 +1,97 @@
+#ppb-table {
+    width: 900px;
+    background-color: #efefef;    
+}
+
+#main-table {    
+    border-spacing: 0px;
+    border-collapse: separate;
+    border: 1px solid #999;
+}
+
+#headline, .header, .test, .table-tree-control {
+    cursor: pointer;
+}
+
+#headline td {    
+    height: 24px;
+    font-size: 14px;
+    font-weight: 700; 
+    color: white;
+    background-color: #005797;
+    text-align: center;
+    padding: 0px;
+    margin-left: 0px;
+    text-overflow: ellipsis;
+}
+#headline-Name, #headline-Datum, #headline-Start, #headline-Stop, #headline-Gesamtzeit, #headline-Abrechnungsart, #headline-Beendet, #headline-Prüfer {
+    border-right: 1px solid #999;
+}
+
+.header {    
+    height: 24px;
+    font-size: 20px;
+    font-weight: bold;
+    text-overflow: ellipsis;
+}
+
+.level0 td {    
+    padding: 4px 0px 4px 8px;
+}
+
+.level1 td {    
+    padding: 4px 0px 4px 4px;
+}
+
+.level2 td {    
+    padding: 4px 0px 4px 2px;
+}
+
+.test {    
+    font-size: 14px;
+    font-weight: bold;
+    height: 26px;
+    padding: 4px;
+    text-overflow: ellipsis;
+}
+
+.header:hover, .test:hover {
+    background-color: #bbbbbb;
+}
+
+.ppb {    
+    height: 24px;
+    font-size: 14px;
+    background-color: white;
+    padding: 0px;
+    text-overflow: ellipsis;
+}
+
+.ppb-name, .ppb-Operator, .ppb-Date, .ppb-Start, .ppb-Stop, .ppb-isTestFinished, .ppb-InvoiceType, .ppb-TotalTime  {
+    border-right: 1px solid #999;
+}
+
+.table-tree-branch {    
+    display: inline-block;
+    margin-top: -9px;
+    vertical-align: middle;
+    height: 9px;
+    width: 7px;
+    margin-right: 5px;
+    border-bottom-left-radius: 1px;
+    border-left: 2px solid #aaa;
+    border-bottom: 2px solid #aaa;   
+}
+
+.table-tree-control {
+    width: 11px;
+    height: 11px;
+    border: 1px solid black;
+    display: inline-flex;
+    justify-content: center;
+    margin-right: 5px;
+    background: rgba(0, 0, 0, .1);
+    margin-top: 2px;
+    vertical-align: middle;
+    margin-top: -3px;
+}

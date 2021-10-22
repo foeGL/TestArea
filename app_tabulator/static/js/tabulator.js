@@ -67,9 +67,6 @@ var dateEditor = function(cell, onRendered, success, cancel, editorParams){
 // http://tabulator.info/docs/4.9/tree
 
 var table = new Tabulator("#example-nested-table", {
-    backgroundColor:"#efefef",
-    minHeight:"300px",
-    width:"500px",
     dataTree:true,
     data:tableDataNested,
     dataTreeStartExpanded:true,
@@ -145,7 +142,7 @@ function formatRow(cell){
             row.getElement().style.fontWeight = 'bold';
             break;
         case 'ppb':
-            row.getElement().style.backgroundColor = "white";
+            row.getElement().style.backgroundColor = "white";         
             break;
         default:
             break;
