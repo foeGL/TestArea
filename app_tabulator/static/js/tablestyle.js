@@ -7,34 +7,35 @@ for (const [key1, arr] of Object.entries(array_tests)){
 }
 
 var columns = [
-    {title:"Name",              field:"name",           visible:1,  width:100}, //never hide this column
-    {title:"ProtocolIdent",     field:"ProtocolIdent",  visible:0,  width:100},
-    {title:"TestIdent",         field:"TestIdent",      visible:0,  width:100},
-    {title:"Prüfung_Voll",      field:"TestNameFull",   visible:0,  width:100},
-    {title:"Abgerechnet",       field:"Invoice",        visible:0,  width:100},
-    {title:"Datum",             field:"Date",           visible:1,  width:100},
-    {title:"Start",             field:"Start",          visible:1,  width:100},
-    {title:"Stop",              field:"Stop",           visible:1,  width:100},
-    {title:"Gesamtzeit",        field:"TotalTime",      visible:1,  width:100},
-    {title:"Abrechnungsart",    field:"InvoiceType",    visible:1,  width:100},
-    {title:"Beendet",           field:"isTestFinished", visible:1,  width:100},
-    {title:"Prüfer",            field:"Operator",       visible:1,  width:100},
-    {title:"Kommentar",         field:"Comment",        visible:1,  width:100},
-    {title:"Element",           field:"element",        visible:0,  width:100},
-    {title:"TreeLevel",         field:"treeLevel",      visible:0,  width:100},
+    {title:"Name",              field:"name",           visible:1,  width:150,  textAlign:"left"}, //never hide this column
+    {title:"ProtocolIdent",     field:"ProtocolIdent",  visible:0,  width:0,    textAlign:"center"},
+    {title:"TestIdent",         field:"TestIdent",      visible:0,  width:0,    textAlign:"center"},
+    {title:"Prüfung_Voll",      field:"TestNameFull",   visible:0,  width:0,    textAlign:"center"},
+    {title:"Abgerechnet",       field:"Invoice",        visible:0,  width:0,    textAlign:"center"},
+    {title:"Datum",             field:"Date",           visible:1,  width:94,   textAlign:"center"},
+    {title:"Start",             field:"Start",          visible:1,  width:94,   textAlign:"center"},
+    {title:"Stop",              field:"Stop",           visible:1,  width:94,   textAlign:"center"},
+    {title:"Gesamtzeit",        field:"TotalTime",      visible:1,  width:94,   textAlign:"center"},
+    {title:"Abrechnungsart",    field:"InvoiceType",    visible:1,  width:150,  textAlign:"center"},
+    {title:"Beendet",           field:"isTestFinished", visible:1,  width:56,   textAlign:"center"},
+    {title:"Prüfer",            field:"Operator",       visible:1,  width:56,   textAlign:"center"},
+    {title:"Kommentar",         field:"Comment",        visible:1,  width:'auto',   textAlign:"center"},
+    {title:"Element",           field:"element",        visible:0,  width:0,    textAlign:"center"},
+    {title:"TreeLevel",         field:"treeLevel",      visible:0,  width:0,    textAlign:"center"},
 ]
 
 function tableCreate() {
     const   body = document.body,
             tbl = document.createElement('table');
-    tbl.style.width = '100px';
+    var tableWidth = '1500px';
+    tbl.style.width = tableWidth;
     //tbl.style.border = '1px solid #999';
     tbl.style.backgroundColor = '#efefef';
     
 
     var headerRows = getHeaderRows(columns)
     const tr = tbl.insertRow();
-    createHeadline(tr, headerRows)
+    createHeadline(tr, headerRows, tableWidth)
 
     for (let key in tableDataNested){
         var row = tableDataNested[key];
@@ -51,7 +52,7 @@ function getHeaderRows(e){
     var invisibleRows = [];
     for (let el in e){
         if (e[el]['visible'] == 1){
-            visibleRowsTitle.push(e[el]['title']);
+            visibleRowsTitle.push(e[el]);
             visibleRows.push(e[el]['field']);
         } else {            
             invisibleRows.push(e[el]['field']);
@@ -60,15 +61,25 @@ function getHeaderRows(e){
     return {'visible': visibleRows, 'invisible': invisibleRows, 'visibleTitle': visibleRowsTitle}
 }
 
-function createHeadline(e, headerRows){
+function createHeadline(e, headerRows, tableWidth){
+    summedWidth = 0
     for (let el in headerRows['visibleTitle']){
         const td = e.insertCell();
-        td.appendChild(document.createTextNode(headerRows['visibleTitle'][el]));
+        td.appendChild(document.createTextNode(headerRows['visibleTitle'][el]['title']));
         td.style.border = borderStyle;
         td.style.fontSize = "14px";    
         td.style.fontWeight = "700";    
         td.style.color = "white";    
-        td.style.backgroundColor = "#005797";    
+        td.style.backgroundColor = "#005797";  
+        if (headerRows['visibleTitle'][el]['width'] != 'auto'){
+            currentCellWidth = headerRows['visibleTitle'][el]['width'];
+            summedWidth += currentCellWidth;
+            td.style.width = currentCellWidth;
+        } else {
+            var test = tableWidth-summedWidth+"px";
+            console.log(tableWidth + "-" + summedWidth +"="+ tableWidth-summedWidth, test)
+            td.style.width = test;
+        }
         
     }
 }
@@ -100,13 +111,15 @@ function insertRow(tbl, row, headerRows){
             td.style.fontWeight = "bold";
             break;
         case 'ppb':
-            for (let visibleRow in headerRows['visible']){
+            for (let visibleRow in headerRows['visibleTitle']){
                 var td = tr.insertCell();
-                td.appendChild(document.createTextNode(row[headerRows['visible'][visibleRow]]));
-                td.setAttribute('field', headerRows['visible'][visibleRow]);
+                console.log("headerRows['visibleTitle'][visibleRow]", headerRows['visibleTitle'][visibleRow])
+                td.appendChild(document.createTextNode(row[headerRows['visibleTitle'][visibleRow]['field']]));
+                td.setAttribute('field', headerRows['visibleTitle'][visibleRow]['field']);
                 td.style.borderRight = borderStyle;
                 td.style.fontSize = "14px";     
                 td.style.backgroundColor = "white";     
+                td.style.textAlign = headerRows['visibleTitle'][visibleRow]['textAlign'];
             }
             for (let invisibleRow in headerRows['invisible']){
                 var td = tr.insertCell();
