@@ -6,12 +6,7 @@ for (const [key1, arr] of Object.entries(array_tests)){
     tableDataNested.push(arr)
 }
 */
-console.log("tableDataNested", tableDataNested)
-
-
-
-
-
+//console.log("tableDataNested", tableDataNested)
 
 var dateEditor = function(cell, onRendered, success, cancel, editorParams){
     var cellValue = cell.getValue(),

@@ -9,6 +9,9 @@
         <link href="{% static 'css/table-style.css' %}" rel="stylesheet" />
     </head>
     <body onLoad="tableCreate()">
+    <!--
+    <body>
+    -->
         {{tests|json_script:"tests"}}
         <div id="ppb-table"></div>
           

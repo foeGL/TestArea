@@ -33,6 +33,9 @@ const settingsDIV = {
     },
     2: {
         marginLeft: "30px",
+    },
+    3: {
+        marginLeft: "49px",
     }
 }
 
@@ -122,8 +125,10 @@ function checkForChildren(tbl, row){
 }
 
 function handleHeader(tr, row){
+    addSubClass(tr, row)
     var td = tr.insertCell();
     var field = 'name'
+    td.classList.add(row['element']+"-name")
     addTreeBranch(row, td, field)
     addTreeContorl(row, td, field)
     td.appendChild(document.createTextNode(row['name']));
@@ -136,9 +141,33 @@ function handleHeader(tr, row){
     }
 }
 
+function addSubClass(tr, row){
+    var elem = row['treeElement'];
+    if (elem != ""){
+        if(elem.search('-') > -1){
+            var e = elem.split('-');
+            e.pop();
+            if (e.length > 1){
+                for (let index in e){
+                    var tmpsub = "sub";
+                    for (let i=0; i<parseInt(index)+1; i++){
+                        tmpsub = tmpsub +"-"+e[i];
+                    }
+                    tr.classList.add(tmpsub);
+                }
+            } else {
+                tr.classList.add("sub-"+e)
+            }
+        }
+    }
+}
+
+
 function handleTest(tr, row){
+    addSubClass(tr, row)
     var td = tr.insertCell();           
     var field = 'name'
+    td.classList.add(row['element']+"-name")
     addTreeBranch(row, td, field)     
     addTreeContorl(row, td, field)  
     td.appendChild(document.createTextNode(row['name']));
@@ -146,6 +175,7 @@ function handleTest(tr, row){
 }
 
 function handlePPB(tr, row){
+    addSubClass(tr, row)
     for (let visibleRow in headerRows['visibleTitle']){
         var field = headerRows['visibleTitle'][visibleRow]['field']
         var td = tr.insertCell();
@@ -196,6 +226,21 @@ function addTreeContorl(row, td, field){
             var div=document.createElement("div")    
             td.appendChild(div);
             div.classList.add("table-tree-control")
+            div.setAttribute("contolElements", "sub-"+row['treeElement']);    
+            div.setAttribute("status", "show");
         }
     }
 }
+
+
+$(document).on('click', '.table-tree-control', function () {     
+    var status = $(this).attr("status");
+    var contolElements = $(this).attr("contolelements");
+    if (status == "show"){
+        $(this).attr("status","hide");
+        $("."+contolElements).css("display", "none");
+    } else {        
+        $(this).attr("status","show");
+        $("."+contolElements).css("display", "inline");
+    }
+});
