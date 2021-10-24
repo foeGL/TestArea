@@ -5,3 +5,6 @@
 /app_tabulator/__pycache__/*
 /app_tabulator/migrations/__pycache__/__init__.cpython-39.pyc
 /django_app/__pycache__/
+/app_tabulator/__pycache__/*
+/app_tabulator/static/js/jsPDF-master.zip
+/app_tabulator/static/js/jsPDF-master/*
