@@ -93,9 +93,34 @@
     border: 1px solid black;
     display: inline-flex;
     justify-content: center;
+    align-items: center;
     margin-right: 5px;
     background: rgba(0, 0, 0, .1);
     margin-top: 2px;
     vertical-align: middle;
     margin-top: -3px;
+    font-size: 14px;
+}
+
+.table-tree-control-expand, .table-tree-control-collapse {
+    height: 7px;
+    width: 1px;
+}
+
+.table-tree-control-expand {    
+    background-color: black;
+}
+
+.table-tree-control-collapse {   
+    background-color: transparent; 
+}
+
+.table-tree-control-collapse::after, .table-tree-control-expand::after {  
+    position: absolute;
+    content: "";
+    height: 1px;
+    width: 7px;
+    background: black;
+    margin-top: 3px;
+    margin-left: -3px;
 }

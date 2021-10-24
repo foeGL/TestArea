@@ -223,24 +223,37 @@ function addTreeBranch(row, td, field){
 function addTreeContorl(row, td, field){
     if (field == 'name'){ 
         if ("_children" in row){
-            var div=document.createElement("div")    
+            var div=document.createElement("div")  ;
+            var subdiv=document.createElement("div");
             td.appendChild(div);
-            div.classList.add("table-tree-control")
+            div.classList.add("table-tree-control");
             div.setAttribute("contolElements", "sub-"+row['treeElement']);    
             div.setAttribute("status", "show");
+            //div.innerHTML = "-";
+            div.appendChild(subdiv);
+            subdiv.classList.add("table-tree-control-expand");
         }
     }
 }
 
-
-$(document).on('click', '.table-tree-control', function () {     
+$(document).on('click', '.table-tree-control', function () {   
+    console.log("wurde getriggert")  
     var status = $(this).attr("status");
     var contolElements = $(this).attr("contolelements");
+    var child = $(this).children('div')
+    console.log(child)
     if (status == "show"){
+        $(child).addClass('table-tree-control-collapse')
+        $(child).removeClass('table-tree-control-expand')
         $(this).attr("status","hide");
-        $("."+contolElements).css("display", "none");
+        $("."+contolElements).hide()
+        //$(this).text('-')
     } else {        
+        $(child).addClass('table-tree-control-expand')
+        $(child).removeClass('table-tree-control-collapse')
         $(this).attr("status","show");
-        $("."+contolElements).css("display", "inline");
+        //$("."+contolElements).css("display", "inline");
+        $("."+contolElements).show()
+        //$(this).text('')
     }
 });
