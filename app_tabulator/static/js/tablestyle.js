@@ -267,3 +267,17 @@ $(document).on('click', '.table-tree-control', function() {
         });
     }
 });
+
+$("#pdfButton").click(function(){
+    html2canvas(document.getElementById('ppb-table')).then(function (canvas) {
+        var imgdata = canvas.toDataURL("image/png");
+        var doc = new jspdf.jsPDF("p", "mm", "a4");
+        const imgProps= doc.getImageProperties(imgdata);
+        const pdfWidth = doc.internal.pageSize.getWidth()-40;
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        const marginX = (doc.internal.pageSize.getWidth() - pdfWidth) / 2;
+        const marginY = 10;
+        doc.addImage(imgdata, "PNG", marginX, marginY, pdfWidth, pdfHeight);
+        doc.save("sample.pdf");
+    });
+});
