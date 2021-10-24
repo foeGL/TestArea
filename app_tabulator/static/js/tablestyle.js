@@ -227,7 +227,7 @@ function addTreeContorl(row, td, field){
             var subdiv=document.createElement("div");
             td.appendChild(div);
             div.classList.add("table-tree-control");
-            div.setAttribute("contolElements", "sub-"+row['treeElement']);    
+            div.setAttribute("controlelements", "sub-"+row['treeElement']);    
             div.setAttribute("status", "show");
             //div.innerHTML = "-";
             div.appendChild(subdiv);
@@ -236,24 +236,34 @@ function addTreeContorl(row, td, field){
     }
 }
 
-$(document).on('click', '.table-tree-control', function () {   
+$(document).on('click', '.table-tree-control', function() {   
     console.log("wurde getriggert")  
     var status = $(this).attr("status");
-    var contolElements = $(this).attr("contolelements");
+    var contolElements = $(this).attr("controlelements");
     var child = $(this).children('div')
-    console.log(child)
     if (status == "show"){
         $(child).addClass('table-tree-control-collapse')
         $(child).removeClass('table-tree-control-expand')
         $(this).attr("status","hide");
         $("."+contolElements).hide()
-        //$(this).text('-')
     } else {        
         $(child).addClass('table-tree-control-expand')
         $(child).removeClass('table-tree-control-collapse')
         $(this).attr("status","show");
-        //$("."+contolElements).css("display", "inline");
         $("."+contolElements).show()
-        //$(this).text('')
+        $("."+contolElements).each(function(index, item){
+            var subChild_td = $(item).children('td')[0];
+            var subChilds_div = $(subChild_td).children('div');
+            if (subChilds_div.length==2){
+                var controlElement = subChilds_div[1];
+                var subStatus = $(controlElement).attr("status")                
+                var subContolElements = $(controlElement).attr("controlelements")
+                if (subStatus == 'show'){
+                    $("."+subContolElements).show();
+                } else {
+                    $("."+subContolElements).hide();
+                }
+            }
+        });
     }
 });

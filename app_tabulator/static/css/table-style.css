@@ -1,6 +1,5 @@
 #ppb-table {
-    width: 900px;
-    background-color: #efefef;    
+    width: 900px; 
 }
 
 #main-table {    
@@ -33,6 +32,7 @@
     font-size: 20px;
     font-weight: bold;
     text-overflow: ellipsis;
+    background-color: #efefef;   
 }
 
 .level0 td {    
@@ -57,6 +57,7 @@
     height: 26px;
     padding: 4px;
     text-overflow: ellipsis;
+    background-color: #efefef;   
 }
 
 .header:hover, .test:hover {
@@ -108,11 +109,11 @@
 }
 
 .table-tree-control-expand {    
-    background-color: black;
+    background-color: transparent; 
 }
 
 .table-tree-control-collapse {   
-    background-color: transparent; 
+    background-color: black;
 }
 
 .table-tree-control-collapse::after, .table-tree-control-expand::after {  
