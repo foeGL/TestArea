@@ -9,7 +9,7 @@ def getTestsOfTestSampleForSpecificOrder(TestSampleIdent, OrderIdent):
     testPackages = list(tests.keys())
     testPackageStructure = getTestPackageStructure(testPackages=testPackages, db=db)    
     formattedTests, counterID, treeElementCounter = formatTestsForTable(tests=tests, testPackages=testPackageStructure, topTestPackageIndex='', db=db)    
-    formattedTests = addTestsWithoutTestPackages(returnValue=formattedTests, tests=tests, counterID=counterID, testPackage='', treeElementCounter=treeElementCounter)
+    formattedTests = addTestsWithoutTestPackages(returnValue=formattedTests, tests=tests, counterID=counterID, testPackage='', treeElementCounter=treeElementCounter, db=db)
     sql_db.closeDB(db)
     return formattedTests
 
@@ -181,25 +181,17 @@ def getTestPackageChildren(testPackage, startID, tests, db, treeLevel, treeEleme
             name = f"TE{'{0:0=2d}'.format(tests[testPackage][test]['TestNumber'])}"
             formattedName = f"{name} - {tests[testPackage][test]['Description']}"
             ePPB, counterID = getEPPBForTest(testIdent=testIdent, counterID=counterID, db=db, testName=name, testFormattedName=formattedName, treeLevel=treeLevel+1, treeElement=subTreeElement)
+            newChild = {
+                "id": tmpStartID,  
+                "testIdent": testIdent,
+                "name": formattedName,           
+                'element': 'test',
+                'treeLevel': treeLevel,
+                'treeElement': f"{subTreeElement}",
+            }
             if ePPB:
-                children.append({
-                    "id": tmpStartID,  
-                    "testIdent": testIdent,
-                    "name": formattedName,           
-                    'element': 'test',
-                    'treeLevel': treeLevel,
-                    'treeElement': f"{subTreeElement}",
-                    "_children": ePPB
-                })
-            else:
-                children.append({
-                    "id": tmpStartID,  
-                    "testIdent": testIdent,
-                    "name": formattedName,           
-                    'element': 'test',
-                    'treeLevel': treeLevel,
-                    'treeElement': f"{subTreeElement}"
-                })
+                newChild["_children"] = ePPB
+            children.append(newChild)
     return children, counterID	
 
 def getEPPBForTest(testIdent, counterID, db, testName, testFormattedName, treeLevel, treeElement):
@@ -234,21 +226,33 @@ def getEPPBForTest(testIdent, counterID, db, testName, testFormattedName, treeLe
             })
     return children, counterID
 
-def addTestsWithoutTestPackages(returnValue, tests, counterID, testPackage, treeElementCounter):
+def addTestsWithoutTestPackages(returnValue, tests, counterID, testPackage, treeElementCounter, db):
+    print(tests)
+    print(testPackage)
     if testPackage in tests:
+        treeLevel = 0
         tmp_counter = treeElementCounter
         for test in tests[testPackage]:
             tmp_counter += 1
             counterID +=1
             name = f"TE{'{0:0=2d}'.format(tests[testPackage][test]['TestNumber'])}"
+            formattedName = f"{name} - {tests[testPackage][test]['Description']}"
+            testIdent = tests[testPackage][test]['TestIdent']
+            subTreeElement = f"{tmp_counter}"
+            ePPB, counterID = getEPPBForTest(testIdent=testIdent, counterID=counterID, db=db, testName=name, testFormattedName=formattedName, treeLevel=treeLevel+1, treeElement=subTreeElement)
+            
             returnValue[len(returnValue)] = {
                 "id": counterID,  
-                "testIdent":tests[testPackage][test]['TestIdent'],
-                "name": f"{name} - {tests[testPackage][test]['Description']}",
+                "testIdent":testIdent,
+                "name": formattedName,
                 'element': 'test',
-                'treeLevel': 0,
-                'treeElement': f"{tmp_counter}"
+                'treeLevel': treeLevel,
+                'treeElement': subTreeElement
             }
+
+            if ePPB:
+                returnValue[len(returnValue)-1]["_children"] = ePPB
+
     return returnValue
 
 

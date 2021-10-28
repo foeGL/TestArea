@@ -22,9 +22,9 @@ const headerRows = getHeaderRows()
 const borderStyle = '1px solid #999'
 
 const Invoice = {
-    0: 'Nicht Abrechnen',
-    1: 'Aufwand',
-    2: 'Pauschal'
+    "-1": 'Nicht Abrechnen',
+    "0": 'Aufwand',
+    "1": 'Pauschal'
 }
 
 const settingsDIV = {
@@ -184,10 +184,12 @@ function handlePPB(tr, row){
         var cellValue="";
         switch(field){
             case 'InvoiceType':
-                if (row[field] < 2){
+                console.log("field: ", field)
+                console.log("row[field]: ", row[field])
+                if (row[field] < 1){
                     cellValue = Invoice[row[field]]
                 } else {
-                    cellValue = 'Pauschale #'+(row[field]-1)
+                    cellValue = 'Pauschale #'+(row[field])
                 }
                 break;
             default:
@@ -271,17 +273,22 @@ $(document).on('click', '.table-tree-control', function() {
 $("#pdfButton").click(function(){    
     var doc = new jspdf.jsPDF("p", "mm", "a4");
     //window.jsPDF = window.jspdf.jsPDF;
-    html2canvas(document.getElementById('ppb-table')).then(function (canvas) {
+    html2canvas(document.getElementById('main-table')).then(function (canvas) {
         canvas.imageSmoothingEnabled = false;
-        var imgdata = canvas.toDataURL("image/png");
-        
-        doc.text(20, 20, 'Prüfplatzbelegung');     
+        var imgdata = canvas.toDataURL("image/jpeg");
+        doc.setFontSize(18);
+        doc.text(15, 15, 'elektronische Prüfplatzbelegung -- 2021-10-27');
+        doc.setFontSize(14);
+        doc.text(15, 30, 'Projekt: 21-0305');
+        doc.text(15, 45, 'Firma: HMS Technology Center Ravensburg GmbH');      
+        doc.text(15, 60, 'Prüfauftrag: 21-0305OR42-001');      
+        doc.text(15, 75, 'Prüfling: 21-0305PR41-001');
         const imgProps= doc.getImageProperties(imgdata);
         const pdfWidth = doc.internal.pageSize.getWidth()-40;
         const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
         const marginX = (doc.internal.pageSize.getWidth() - pdfWidth) / 2;
-        const marginY = 10;   
-        doc.addImage(imgdata, "PNG", marginX, marginY, pdfWidth, pdfHeight);
+        const marginY = 100;   
+        doc.addImage(imgdata, "JPEG", marginX, marginY, pdfWidth, pdfHeight);
         doc.save("sample.pdf");
     });
 });
