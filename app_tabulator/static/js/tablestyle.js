@@ -212,6 +212,7 @@ function formatCellValue(row, td, field){
             checkbox.value  = row[field];
             checkbox.checked = row[field];
             $(checkbox).css('display',"none");
+            $(checkbox).css('margin-top', '7px');
             checkbox.classList.add("finishedCheckBox");
             var svg = document.createElementNS("http://www.w3.org/2000/svg","svg");     
             var newPath = document.createElementNS("http://www.w3.org/2000/svg","path");   
@@ -223,6 +224,7 @@ function formatCellValue(row, td, field){
             svg.setAttributeNS(null, 'width', "14");
             svg.setAttributeNS(null, 'viewBox', '0 0 24 24');
             svg.setAttributeNS(null, 'appearance', row[field]); 
+            $(svg).css('margin-top', "6px");
   
             if (row[field] == true){         
                 var [fill, d] = setCheckboxTrue();
