@@ -1,5 +1,6 @@
 #ppb-table {
-    width: 900px; 
+    width: 1200px; 
+    background-color: green;
 }
 
 #main-table {    
@@ -141,4 +142,8 @@
     background: black;
     margin-top: 3px;
     margin-left: -3px;
+}
+
+.svgCheck {
+    cursor: pointer;
 }

@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from . import functions
 
-offline = False
-numb = 7
+offline = True
+numb = 2
 
 TestOrders = {
     0: {'TestSampleIdent': 723, 'OrderIdent':469, 'Project': '21-0322'},

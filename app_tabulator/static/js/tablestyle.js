@@ -1,4 +1,5 @@
-const array_tests = JSON.parse(document.getElementById('tests').textContent);
+
+var dataPPB = JSON.parse(document.getElementById('tests').textContent);
 
 const columns = [
     {title:"Name",              field:"name",           visible:1,  width:130,      textAlign:"left"},
@@ -6,9 +7,9 @@ const columns = [
     {title:"TestIdent",         field:"TestIdent",      visible:0,  width:0,        textAlign:"center"},
     {title:"Prüfung_Voll",      field:"TestNameFull",   visible:0,  width:0,        textAlign:"center"},
     {title:"Abgerechnet",       field:"Invoice",        visible:0,  width:0,        textAlign:"center"},
-    {title:"Datum",             field:"Date",           visible:1,  width:94,       textAlign:"center"},
-    {title:"Start",             field:"Start",          visible:1,  width:94,       textAlign:"center"},
-    {title:"Stop",              field:"Stop",           visible:1,  width:94,       textAlign:"center"},
+    {title:"Datum",             field:"Date",           visible:1,  width:110,       textAlign:"center"},
+    {title:"Start",             field:"Start",          visible:1,  width:90,       textAlign:"center"},
+    {title:"Stop",              field:"Stop",           visible:1,  width:90,       textAlign:"center"},
     {title:"Gesamtzeit",        field:"TotalTime",      visible:1,  width:84,       textAlign:"center"},
     {title:"Abrechnungsart",    field:"InvoiceType",    visible:1,  width:110,      textAlign:"center"},
     {title:"Beendet",           field:"isTestFinished", visible:1,  width:56,       textAlign:"center"},
@@ -16,16 +17,16 @@ const columns = [
     {title:"Kommentar",         field:"Comment",        visible:1,  width:'auto',   textAlign:"center"},
     {title:"Element",           field:"element",        visible:0,  width:0,        textAlign:"center"},
     {title:"TreeLevel",         field:"treeLevel",      visible:0,  width:0,        textAlign:"center"},
-]
+];
 
-const headerRows = getHeaderRows()
-const borderStyle = '1px solid #999'
+
+const borderStyle = '1px solid #999';
 
 const Invoice = {
     "-1": 'Nicht Abrechnen',
     "0": 'Aufwand',
     "1": 'Pauschal'
-}
+};
 
 const settingsDIV = {
     1: {
@@ -37,28 +38,28 @@ const settingsDIV = {
     3: {
         marginLeft: "49px",
     }
-}
+};
 
-var tableDataNested = []        
-for (const [key1, arr] of Object.entries(array_tests)){
-    tableDataNested.push(arr)
-}
+const headerRows = getHeaderRows()
 
-function tableCreate() {
+
+$(window).on('load', function(){
     var body = document.getElementById("ppb-table"),
         tbl = document.createElement('table');
-    tbl.setAttribute("id", "main-table");    
+    tbl.setAttribute("id", "main-table");   
+    var tableWidth = $("#ppb-table").width();
+    tbl.setAttribute("width", tableWidth);     
     var tr = tbl.insertRow();
-    tr.setAttribute("id", "headline");    
+    tr.setAttribute("id", "headline");
     createHeadline(tr, headerRows)
 
-    for (let key in tableDataNested){
-        var row = tableDataNested[key];
+    for (let key in dataPPB){
+        var row = dataPPB[key];
         insertRow(tbl, row)
         checkForChildren(tbl, row)
     }    
     body.appendChild(tbl);
-}
+});
   
 function getHeaderRows(){
     var visibleRows = [];    
@@ -81,11 +82,12 @@ function createHeadline(e, headerRows){
     for (let el in headerRows['visibleTitle']){
         const th = e.insertCell()
         th.appendChild(document.createTextNode(headerRows['visibleTitle'][el]['title']));
-        th.setAttribute('id', 'headline-'+headerRows['visibleTitle'][el]['title']);
+        var headlineID = headerRows['visibleTitle'][el]['title']
+        th.setAttribute('id', 'headline-'+headlineID);
         if (headerRows['visibleTitle'][el]['width'] != 'auto'){
             currentCellWidth = headerRows['visibleTitle'][el]['width'];
             summedWidth += currentCellWidth;
-            th.style.width = currentCellWidth;
+            th.style.width = currentCellWidth+"px";
         } else {
             var test = tableWidth-summedWidth+"px";
             th.style.width = test;
@@ -180,8 +182,7 @@ function handlePPB(tr, row){
         var td = tr.insertCell();
         td.classList.add('ppb-'+field)
         addTreeBranch(row, td, field)
-        var cellValue = formatCellValue(row, field);
-        td.appendChild(document.createTextNode(cellValue));
+        formatCellValue(row, td, field);
         td.setAttribute('field', field);
         td.style.textAlign = headerRows['visibleTitle'][visibleRow]['textAlign'];
     }
@@ -193,7 +194,7 @@ function handlePPB(tr, row){
     }       
 }
 
-function formatCellValue(row, field){
+function formatCellValue(row, td, field){
     var cellValue="";
     switch(field){
         case 'InvoiceType':
@@ -201,13 +202,61 @@ function formatCellValue(row, field){
                 cellValue = Invoice[row[field]]
             } else {
                 cellValue = 'Pauschale #'+(row[field])
-            }
+            }            
+            td.appendChild(document.createTextNode(cellValue));
+            break;
+        case 'isTestFinished':              
+            var div = document.createElement("div")    
+            var checkbox = document.createElement("input")
+            checkbox.type = 'checkbox';
+            checkbox.value  = row[field];
+            checkbox.checked = row[field];
+            $(checkbox).css('display',"none");
+            checkbox.classList.add("finishedCheckBox");
+            var svg = document.createElementNS("http://www.w3.org/2000/svg","svg");     
+            var newPath = document.createElementNS("http://www.w3.org/2000/svg","path");   
+            td.appendChild(div);
+            div.classList.add('svgCheck');     
+            div.setAttribute('isChecked', row[field]) 
+            div.appendChild(svg);
+            svg.setAttributeNS(null, 'height', "14"); 
+            svg.setAttributeNS(null, 'width', "14");
+            svg.setAttributeNS(null, 'viewBox', '0 0 24 24');
+            svg.setAttributeNS(null, 'appearance', row[field]); 
+  
+            if (row[field] == true){         
+                var [fill, d] = setCheckboxTrue();
+            } else {      
+                var [fill, d] = getCheckboxFalse();  
+            }        
+            console.log("fill: "+fill, "d: "+d)
+            newPath.setAttributeNS(null, 'fill', fill)   
+            newPath.setAttributeNS(null, "d", d)
+                
+            svg.appendChild(newPath);            
+            div.appendChild(checkbox);
+            td.appendChild(document.createTextNode(cellValue));
+            //console.log("isTestFinished: " +row[field])
+            //cellValue = row[field];
+            break;
+        case 'Start':  
+            cellValue = String(row[field]).substring(0,5)
+            td.appendChild(document.createTextNode(cellValue));
+            break;            
+        case 'Stop':  
+            cellValue = String(row[field]).substring(0,5)
+            td.appendChild(document.createTextNode(cellValue));
             break;
         default:
             cellValue = row[field]
+            td.appendChild(document.createTextNode(cellValue));
             break;
     }
     return cellValue
+}
+
+function format_two_digits(n) {
+    return n < 10 ? '0' + n : n;
 }
 
 function addTreeBranch(row, td, field){
@@ -298,8 +347,8 @@ $("#pdfButton").click(function(){
 
 function pdf_formatTableDate(){
     var pdfTable = [];
-    for (let key in tableDataNested){
-        var row = tableDataNested[key];
+    for (let key in dataPPB){
+        var row = dataPPB[key];
         pdfTable.push(pdf_formatRow(row))
         pdfTable = pdf_addChildren(pdfTable, row)
     }    
@@ -440,4 +489,50 @@ function demoFromHTML1() {
         }  
     })  
     doc.save('ePPB.pdf');  
+}
+
+$('body').on('click', '.svgCheck', function(){
+    this.classList.add("svgCheck-edit")
+    var e = $(this).attr('ischecked');
+
+    var childSVG = $(this).children('svg');
+    var childBox = $(this).children('input');
+    $(childSVG).css('display','none')
+    $(childBox).css('display','inline')
+});
+
+$('body').on('click', '.finishedCheckBox', function(){
+    var parent = $(this).parent();
+    var checked = this.checked;
+    console.log(checked)
+});
+
+
+document.addEventListener('mouseup', function(e) {
+    var box = document.getElementsByClassName('svgCheck-edit');
+    var childSVG = $(box).children('svg');
+    var childBox = $(box).children('input');
+    $(childSVG).css('display','inline')
+    $(childBox).css('display','none')   
+
+    var appearance = $(childSVG).attr('appearance')
+    var childBoxValue = $(childBox).attr('value');
+    console.log(appearance)
+    console.log(childBoxValue)
+    if (appearance != childBoxValue){
+
+    }
+});
+
+function setCheckboxTrue(){
+    var fill = "#2DC214";
+    var d = "M21.652,3.211c-0.293-0.295-0.77-0.295-1.061,0L9.41,14.34  c-0.293,0.297-0.771,0.297-1.062,0L3.449,9.351C3.304,9.203,3.114,9.13,2.923,9.129C2.73,9.128,2.534,9.201,2.387,9.351  l-2.165,1.946C0.078,11.445,0,11.63,0,11.823c0,0.194,0.078,0.397,0.223,0.544l4.94,5.184c0.292,0.296,0.771,0.776,1.062,1.07  l2.124,2.141c0.292,0.293,0.769,0.293,1.062,0l14.366-14.34c0.293-0.294,0.293-0.777,0-1.071L21.652,3.211z";
+    return [fill, d]
+}
+
+
+function getCheckboxFalse(){
+    var fill = "#CE1515";
+    var d = "M22.245,4.015c0.313,0.313,0.313,0.826,0,1.139l-6.276,6.27c-0.313,0.312-0.313,0.826,0,1.14l6.273,6.272  c0.313,0.313,0.313,0.826,0,1.14l-2.285,2.277c-0.314,0.312-0.828,0.312-1.142,0l-6.271-6.271c-0.313-0.313-0.828-0.313-1.141,0  l-6.276,6.267c-0.313,0.313-0.828,0.313-1.141,0l-2.282-2.28c-0.313-0.313-0.313-0.826,0-1.14l6.278-6.269  c0.313-0.312,0.313-0.826,0-1.14L1.709,5.147c-0.314-0.313-0.314-0.827,0-1.14l2.284-2.278C4.308,1.417,4.821,1.417,5.135,1.73  L11.405,8c0.314,0.314,0.828,0.314,1.141,0.001l6.276-6.267c0.312-0.312,0.826-0.312,1.141,0L22.245,4.015z";
+    return [fill, d]
 }

@@ -1,6 +1,6 @@
 {% load static %}
-
-<htmL>
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <script src="{% static 'js/jquery.js' %}"></script>
         <link href="{% static 'css/table-style.css' %}" rel="stylesheet" />
@@ -10,8 +10,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.0.0-rc.5/dist/html2canvas.min.js"></script>
     </head>
-    <body onLoad="tableCreate()">
-        
+    <body>
         {{tests|json_script:"tests"}}
         <div id="ppb-table"></div>
         <button id="pdfButton">Convert to PDF</button>
