@@ -6,6 +6,7 @@
     border-spacing: 0px;
     border-collapse: separate;
     border: 1px solid #999;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
 }
 
 #headline, .header, .test, .table-tree-control {
@@ -32,7 +33,7 @@
     font-size: 20px;
     font-weight: bold;
     text-overflow: ellipsis;
-    background-color: #efefef;   
+    background-color: #f3f3f5;   /*#efefef*/
 }
 
 .level0 td {    
@@ -52,12 +53,18 @@
 }
 
 .test {    
-    font-size: 14px;
-    font-weight: bold;
-    height: 26px;
+    font-size: 12px;
+    font-weight: 800;
+    height: 30px;
     padding: 4px;
     text-overflow: ellipsis;
-    background-color: #efefef;   
+    background-color: #f3f3f5;   /*#efefef*/
+    text-transform: uppercase;
+}
+
+.test td, .ppb td {
+    
+    border-bottom: 1px solid #ebebeb;
 }
 
 .header:hover, .test:hover {
@@ -73,13 +80,17 @@
 }
 
 .ppb td {    
-    height: 24px;
+    height: 40px;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
+.ppb-name {
+    color: lightgray;
+}
+
 .ppb-name, .ppb-Operator, .ppb-Date, .ppb-Start, .ppb-Stop, .ppb-isTestFinished, .ppb-InvoiceType, .ppb-TotalTime  {
-    border-right: 1px solid #999;
+    border-right: none; /*1px solid #999;*/
 }
 
 .table-tree-branch {    
