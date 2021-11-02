@@ -12,10 +12,12 @@
     </head>
     <body>
         {{tests|json_script:"tests"}}
-        <div id="ppb-table"></div>
-        <button id="pdfButton">Convert to PDF</button>
-        <button id="testButton" onclick="javascript:demoFromHTML()">Test</button>
+        <div id="content" style="width: 100%; height: 100%;">
+            <div id="ppb-table" style="margin: 0 auto;"></div>
+            <button id="pdfButton" style="margin: 0 auto;">Convert to PDF</button>
+            <button id="testButton" style="margin: 0 auto;" onclick="javascript:demoFromHTML()">Test</button>
     
+        </div>
         <script src="{% static 'js/tablestyle.js' %}"></script>
     </body>
 </htmL>

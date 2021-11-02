@@ -90,7 +90,7 @@
     color: lightgray;
 }
 
-.ppb-name, .ppb-Operator, .ppb-Date, .ppb-Start, .ppb-Stop, .ppb-isTestFinished, .ppb-InvoiceType, .ppb-TotalTime  {
+.ppb-name, .ppb-operator, .ppb-date, .ppb-start, .ppb-stop, .ppb-isTestFinished, .ppb-invoiceType, .ppb-totalTime  {
     border-right: none; /*1px solid #999;*/
 }
 
@@ -146,4 +146,20 @@
 
 .svgCheck {
     cursor: pointer;
+}
+
+.start-edit {
+    text-align: center;
+    height: 100%;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+    font-size: 14px;
+}
+
+.ppb-start text {
+    color: green;
+}
+
+.ppb-cellValue{
+    margin: 0px;
+    padding: 0px;
 }

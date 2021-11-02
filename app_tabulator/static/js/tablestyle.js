@@ -2,21 +2,21 @@
 var dataPPB = JSON.parse(document.getElementById('tests').textContent);
 
 const columns = [
-    {title:"Name",              field:"name",           visible:1,  width:130,      textAlign:"left"},
-    {title:"ProtocolIdent",     field:"ProtocolIdent",  visible:0,  width:0,        textAlign:"center"},
-    {title:"TestIdent",         field:"TestIdent",      visible:0,  width:0,        textAlign:"center"},
-    {title:"Prüfung_Voll",      field:"TestNameFull",   visible:0,  width:0,        textAlign:"center"},
-    {title:"Abgerechnet",       field:"Invoice",        visible:0,  width:0,        textAlign:"center"},
-    {title:"Datum",             field:"Date",           visible:1,  width:110,       textAlign:"center"},
-    {title:"Start",             field:"Start",          visible:1,  width:90,       textAlign:"center"},
-    {title:"Stop",              field:"Stop",           visible:1,  width:90,       textAlign:"center"},
-    {title:"Gesamtzeit",        field:"TotalTime",      visible:1,  width:84,       textAlign:"center"},
-    {title:"Abrechnungsart",    field:"InvoiceType",    visible:1,  width:110,      textAlign:"center"},
-    {title:"Beendet",           field:"isTestFinished", visible:1,  width:56,       textAlign:"center"},
-    {title:"Prüfer",            field:"Operator",       visible:1,  width:56,       textAlign:"center"},
-    {title:"Kommentar",         field:"Comment",        visible:1,  width:'auto',   textAlign:"center"},
-    {title:"Element",           field:"element",        visible:0,  width:0,        textAlign:"center"},
-    {title:"TreeLevel",         field:"treeLevel",      visible:0,  width:0,        textAlign:"center"},
+    {title:"Name",              field:"name",           visible:1,  width:130,      textAlign:"left",       editor:false},
+    {title:"ProtocolIdent",     field:"protocolIdent",  visible:0,  width:0,        textAlign:"center",     editor:false},
+    {title:"TestIdent",         field:"testIdent",      visible:0,  width:0,        textAlign:"center",     editor:false},
+    {title:"Prüfung_Voll",      field:"testNameFull",   visible:0,  width:0,        textAlign:"center",     editor:false},
+    {title:"Abgerechnet",       field:"invoice",        visible:0,  width:0,        textAlign:"center",     editor:false},
+    {title:"Datum",             field:"date",           visible:1,  width:110,       textAlign:"center",    editor:true},
+    {title:"Start",             field:"start",          visible:1,  width:90,       textAlign:"center",     editor:false},
+    {title:"Stop",              field:"stop",           visible:1,  width:90,       textAlign:"center",     editor:false},
+    {title:"Gesamtzeit",        field:"totalTime",      visible:1,  width:84,       textAlign:"center",     editor:false},
+    {title:"Abrechnungsart",    field:"invoiceType",    visible:1,  width:110,      textAlign:"center",     editor:false},
+    {title:"Beendet",           field:"isTestFinished", visible:1,  width:56,       textAlign:"center",     editor:false},
+    {title:"Prüfer",            field:"operator",       visible:1,  width:56,       textAlign:"center",     editor:false},
+    {title:"Kommentar",         field:"comment",        visible:1,  width:'auto',   textAlign:"center",     editor:false},
+    {title:"Element",           field:"element",        visible:0,  width:0,        textAlign:"center",     editor:false},
+    {title:"TreeLevel",         field:"treeLevel",      visible:0,  width:0,        textAlign:"center",     editor:false},
 ];
 
 
@@ -182,7 +182,7 @@ function handlePPB(tr, row){
         var td = tr.insertCell();
         td.classList.add('ppb-'+field)
         addTreeBranch(row, td, field)
-        formatCellValue(row, td, field);
+        formatCell(row, td, field);
         td.setAttribute('field', field);
         td.style.textAlign = headerRows['visibleTitle'][visibleRow]['textAlign'];
     }
@@ -194,10 +194,16 @@ function handlePPB(tr, row){
     }       
 }
 
-function formatCellValue(row, td, field){
+function formatCell(row, td, field){
     var cellValue="";
+    var p = document.createElement("p")   
     switch(field){
-        case 'InvoiceType':
+        case 'name':
+            cellValue = row[field]
+            td.appendChild(document.createTextNode(cellValue));
+            break;
+
+        case 'invoiceType':
             if (row[field] < 1){
                 cellValue = Invoice[row[field]]
             } else {
@@ -240,17 +246,34 @@ function formatCellValue(row, td, field){
             //console.log("isTestFinished: " +row[field])
             //cellValue = row[field];
             break;
-        case 'Start':  
-            cellValue = String(row[field]).substring(0,5)
-            td.appendChild(document.createTextNode(cellValue));
+        case 'start':                    
+            var cellWidth = "";  
+            for (let el in headerRows['visibleTitle']){
+                if (headerRows['visibleTitle'][el]['field'] == field){
+                    cellWidth=headerRows['visibleTitle'][el]['width']
+                }
+            }
+            cellValue = String(row[field]).substring(0,5)     
+            var textInput = document.createElement("input");
+            textInput.type = 'text';
+            textInput.value  = cellValue;
+            textInput.classList.add(field+"-edit")
+            td.appendChild(textInput);
+            $(textInput).width((cellWidth-20)+"px");
+            $(textInput).css("display", "none");            
+            td.appendChild(p);
+            p.classList.add("ppb-cellValue");
+            p.appendChild(document.createTextNode(cellValue));
             break;            
-        case 'Stop':  
+        case 'stop':  
             cellValue = String(row[field]).substring(0,5)
             td.appendChild(document.createTextNode(cellValue));
             break;
         default:
             cellValue = row[field]
-            td.appendChild(document.createTextNode(cellValue));
+            td.appendChild(p);
+            p.classList.add("ppb-cellValue");
+            p.appendChild(document.createTextNode(cellValue));
             break;
     }
     return cellValue
@@ -379,7 +402,7 @@ function pdf_formatRow(row){
         var field = headerRows['visible'][cell]
         if (field in row){
             console.log("schreibt in feld "+field)
-            formattedRow[field] = formatCellValue(row, field);
+            formattedRow[field] = formatCell(row, field);
         }
     }
     return formattedRow
@@ -492,8 +515,19 @@ function demoFromHTML1() {
     doc.save('ePPB.pdf');  
 }
 
+
+
+$(document).on('click', '.ppb-start', function() {   // <--------------------------------------------------------------- Hier!
+    this.classList.add("ppb-edit") 
+    var childInput = $(this).children('input');
+    var childP = $(this).children('p');
+    $(childP).css('display','none')
+    $(childInput).css('display','inline')
+});
+
+
 $('body').on('click', '.svgCheck', function(){
-    this.classList.add("svgCheck-edit")
+    this.classList.add("ppb-edit")
     var e = $(this).attr('ischecked');
 
     var childSVG = $(this).children('svg');
@@ -509,7 +543,7 @@ $('body').on('click', '.finishedCheckBox', function(){
 
 
 document.addEventListener('mouseup', function(e) {
-    var box = document.getElementsByClassName('svgCheck-edit')[0];
+    var box = document.getElementsByClassName('ppb-edit')[0];
     var childSVG = $(box).children('svg');
     var childBox = $(box).children('input');
     $(childSVG).css('display','inline')
@@ -531,7 +565,7 @@ document.addEventListener('mouseup', function(e) {
         $(childPath).attr('d', figure);
         $(childSVG).attr('appearance',childBoxValue);
     }
-    $(box).removeClass('svgCheck-edit');
+    $(box).removeClass('ppb-edit');
 });
 
 function setCheckboxTrue(){
