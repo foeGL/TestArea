@@ -247,27 +247,10 @@ function formatCell(row, td, field){
             //cellValue = row[field];
             break;
         case 'start':                    
-            var cellWidth = "";  
-            for (let el in headerRows['visibleTitle']){
-                if (headerRows['visibleTitle'][el]['field'] == field){
-                    cellWidth=headerRows['visibleTitle'][el]['width']
-                }
-            }
-            cellValue = String(row[field]).substring(0,5)     
-            var textInput = document.createElement("input");
-            textInput.type = 'text';
-            textInput.value  = cellValue;
-            textInput.classList.add(field+"-edit")
-            td.appendChild(textInput);
-            $(textInput).width((cellWidth-20)+"px");
-            $(textInput).css("display", "none");            
-            td.appendChild(p);
-            p.classList.add("ppb-cellValue");
-            p.appendChild(document.createTextNode(cellValue));
+            addEditForTime(td, field, row);
             break;            
         case 'stop':  
-            cellValue = String(row[field]).substring(0,5)
-            td.appendChild(document.createTextNode(cellValue));
+            addEditForTime(td, field, row);
             break;
         default:
             cellValue = row[field]
@@ -281,6 +264,27 @@ function formatCell(row, td, field){
 
 function format_two_digits(n) {
     return n < 10 ? '0' + n : n;
+}
+
+function addEditForTime(td, field, row){
+    var p = document.createElement("p")   
+    var cellWidth = "";  
+    for (let el in headerRows['visibleTitle']){
+        if (headerRows['visibleTitle'][el]['field'] == field){
+            cellWidth=headerRows['visibleTitle'][el]['width']
+        }
+    }
+    cellValue = String(row[field]).substring(0,5)     
+    var textInput = document.createElement("input");
+    textInput.type = 'text';
+    textInput.value  = cellValue;
+    textInput.classList.add(field+"-edit")
+    td.appendChild(textInput);
+    $(textInput).width((cellWidth-20)+"px");
+    $(textInput).css("display", "none");            
+    td.appendChild(p);
+    p.classList.add("ppb-cellValue");
+    p.appendChild(document.createTextNode(cellValue));
 }
 
 function addTreeBranch(row, td, field){
@@ -518,12 +522,21 @@ function demoFromHTML1() {
 
 
 $(document).on('click', '.ppb-start', function() {   // <--------------------------------------------------------------- Hier!
-    this.classList.add("ppb-edit") 
-    var childInput = $(this).children('input');
-    var childP = $(this).children('p');
+    onClickForEdit(this);
+});
+
+$(document).on('click', '.ppb-stop', function() {   // <--------------------------------------------------------------- Hier!
+    onClickForEdit(this);
+});
+
+function onClickForEdit(el){
+    el.classList.add("ppb-edit") 
+    var childInput = $(el).children('input');
+    var childP = $(el).children('p');
     $(childP).css('display','none')
     $(childInput).css('display','inline')
-});
+    $(childInput).val($(childP).text());
+}
 
 
 $('body').on('click', '.svgCheck', function(){
@@ -544,29 +557,60 @@ $('body').on('click', '.finishedCheckBox', function(){
 
 document.addEventListener('mouseup', function(e) {
     var box = document.getElementsByClassName('ppb-edit')[0];
-    var childSVG = $(box).children('svg');
-    var childBox = $(box).children('input');
-    $(childSVG).css('display','inline')
-    $(childBox).css('display','none')   
+    if (box != null){
+        var initialClass = box.classList[0];
+        //var classCat = String(initialClass).substring(4);
+        switch (initialClass){
+            case "svgCheck":
+                var childSVG = $(box).children('svg');
+                var childBox = $(box).children('input');
+                $(childSVG).css('display','inline')
+                $(childBox).css('display','none')   
 
-    var appearance = $(childSVG).attr('appearance')
-    var childBoxValue = $(childBox).attr('value');
-    if (appearance != childBoxValue){   
-        
-        var childPath = $(childSVG).children('path');   
-        console.log(childPath, $(childPath).attr('fill'))  
-        if (childBoxValue == 'true'){         
-            var [color, figure] = setCheckboxTrue();
-        } else {      
-            var [color, figure] = getCheckboxFalse();  
-        }        
-        console.log("set to :"+color+" and "+figure)
-        $(childPath).attr('fill', color);
-        $(childPath).attr('d', figure);
-        $(childSVG).attr('appearance',childBoxValue);
+                var appearance = $(childSVG).attr('appearance')
+                var childBoxValue = $(childBox).attr('value');
+                if (appearance != childBoxValue){   
+                    
+                    var childPath = $(childSVG).children('path');   
+                    console.log(childPath, $(childPath).attr('fill'))  
+                    if (childBoxValue == 'true'){         
+                        var [color, figure] = setCheckboxTrue();
+                    } else {      
+                        var [color, figure] = getCheckboxFalse();  
+                    }        
+                    console.log("set to :"+color+" and "+figure)
+                    $(childPath).attr('fill', color);
+                    $(childPath).attr('d', figure);
+                    $(childSVG).attr('appearance',childBoxValue);
+                }
+                break;
+            default:
+                var childView = $(box).children('p');
+                var childEdit = $(box).children('input');
+                var newValue = $(childEdit).val();
+                if (isTime(newValue) == true){
+                    $(childView).text(newValue);
+                }
+                $(childEdit).css('display','none');
+                $(childView).css('display','inline');
+                break;                    
+        }
+        $(box).removeClass('ppb-edit');        
     }
-    $(box).removeClass('ppb-edit');
 });
+
+function isTime(time){
+    var isTime = true
+    if (String(time).substring(2,3)!=':'){ 
+        isTime = false; 
+    } else {
+        var hours = parseInt(String(time).substring(0,2));
+        var minutes = parseInt(String(time).substring(3,5));
+        if (hours<0 | hours>24){isTime = false;}
+        if (minutes<0 | minutes>60){isTime = false;}
+    }
+    return isTime
+}
 
 function setCheckboxTrue(){
     var fill = "#2DC214";
