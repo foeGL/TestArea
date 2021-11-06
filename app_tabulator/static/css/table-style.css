@@ -68,7 +68,7 @@
     border-bottom: 1px solid #ebebeb;
 }
 
-.header:hover, .test:hover {
+.header:hover, .test:hover, .ppb-name-dd-item:hover {
     background-color: #bbbbbb;
 }
 
@@ -162,4 +162,46 @@
 .ppb-cellValue{
     margin: 0px;
     padding: 0px;
+}
+
+.ppb-name-dd {
+    list-style-type: none;
+    position: absolute;
+    margin-left: -3px;
+    padding: 0px;
+    border: 1px solid black;
+    z-index: 200;
+    display: none;
+}
+
+.ppb-name-dd-item {
+    margin: 0px;
+    /*width: 13rem;*/
+    font-size: 12px;
+    font-weight: 800;
+    height: 14px;
+    padding: 4px;
+    text-overflow: ellipsis;
+    background-color: #f3f3f5;
+    text-transform: uppercase;
+    color: black;
+}
+
+.ppb-p {
+    display: inline;
+    height: 24px;
+    font-size: 14px;
+    background-color: white;
+    padding: 0px;
+    text-overflow: ellipsis;
+}
+
+.ppb-invoice-dd {
+    list-style-type: none;
+    position: absolute;
+    margin-left: -3px;
+    padding: 0px;
+    border: 1px solid black;
+    z-index: 200;
+    display: none;
 }

@@ -1,4 +1,16 @@
+$(document).on('click', '.ppb-name', function() {
+    onClickDDForEdit(this);
+});
 
+$(document).on('click', '.ppb-invoiceType', function() {
+    onClickDDForEdit(this);
+});
+
+function onClickDDForEdit(el){
+    el.classList.add("ppb-edit") 
+    var childList = $(el).children('ul');
+    $(childList).css('display','block')
+}
 
 $(document).on('click', '.ppb-start', function() {
     onClickForEdit(this);
@@ -47,6 +59,18 @@ $('body').on('click', '.finishedCheckBox', function(){
     $(this).attr('value', checked);
 });
 
+$(document).on('click', '.ppb-name-dd-item', function() {
+    var parent=$(this).parents('td');
+    var childP = $(parent).children('p');
+    $(childP).text("TE1000"); 
+
+    
+    var childList = $(parent).children('ul');
+    console.log(childList)
+    $(childList).css('display','none');
+    $(parent).removeClass('ppb-edit');   
+});
+
 
 document.addEventListener('mouseup', function(e) {
     var box = document.getElementsByClassName('ppb-edit')[0];
@@ -54,6 +78,12 @@ document.addEventListener('mouseup', function(e) {
         var initialClass = box.classList[0];
         //var classCat = String(initialClass).substring(4);
         switch (initialClass){
+            case "ppb-name":      
+                hideDD(box);  
+                break;
+            case "ppb-invoiceType":  
+                hideDD(box);  
+                break;
             case "svgCheck":
                 var childSVG = $(box).children('svg');
                 var childBox = $(box).children('input');
@@ -77,11 +107,11 @@ document.addEventListener('mouseup', function(e) {
                     $(childSVG).attr('appearance',childBoxValue);
                 }
                 break;
-            case "start":
-                switchViewAndEditTime();
+            case "ppb-start":
+                switchViewAndEditTime(box);
                 break;
-            case "stop":
-                switchViewAndEditTime();
+            case "ppb-stop":
+                switchViewAndEditTime(box);
                 break;
             default:
                 var childView = $(box).children('p');
@@ -96,7 +126,7 @@ document.addEventListener('mouseup', function(e) {
     }
 });
 
-function switchViewAndEditTime(){
+function switchViewAndEditTime(box){
     var childView = $(box).children('p');
     var childEdit = $(box).children('input');
     var newValue = $(childEdit).val();
@@ -107,15 +137,21 @@ function switchViewAndEditTime(){
     $(childView).css('display','inline');
 }
 
+function hideDD(box){
+    var childList = $(box).children('ul');
+    $(childList).css('display','none');
+}
+
 function isTime(time){
     var isTime = true
-    if (String(time).substring(2,3)!=':'){ 
+    if (String(time).indexOf(':')==-1){ 
         isTime = false; 
     } else {
-        var hours = parseInt(String(time).substring(0,2));
-        var minutes = parseInt(String(time).substring(3,5));
+        var splitted = String(time).split(':')
+        var hours = parseInt(splitted[0]);
+        var minutes = parseInt(splitted[1]);
         if (hours<0 | hours>24){isTime = false;}
-        if (minutes<0 | minutes>60){isTime = false;}
+        if (minutes<0 || minutes>59){isTime = false;}
     }
     return isTime
 }

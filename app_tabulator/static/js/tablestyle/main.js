@@ -1,22 +1,23 @@
 
-var dataPPB = JSON.parse(document.getElementById('tests').textContent);
+const dataPPB = JSON.parse(document.getElementById('ppb').textContent);
+const testCases = JSON.parse(document.getElementById('tests').textContent);
 
 const columns = [
-    {title:"Name",              field:"name",           visible:1,  width:130,      textAlign:"left",       editor:false},
-    {title:"ProtocolIdent",     field:"protocolIdent",  visible:0,  width:0,        textAlign:"center",     editor:false},
-    {title:"TestIdent",         field:"testIdent",      visible:0,  width:0,        textAlign:"center",     editor:false},
-    {title:"Prüfung_Voll",      field:"testNameFull",   visible:0,  width:0,        textAlign:"center",     editor:false},
-    {title:"Abgerechnet",       field:"invoice",        visible:0,  width:0,        textAlign:"center",     editor:false},
-    {title:"Datum",             field:"date",           visible:1,  width:110,       textAlign:"center",    editor:true},
-    {title:"Start",             field:"start",          visible:1,  width:90,       textAlign:"center",     editor:false},
-    {title:"Stop",              field:"stop",           visible:1,  width:90,       textAlign:"center",     editor:false},
-    {title:"Gesamtzeit",        field:"totalTime",      visible:1,  width:84,       textAlign:"center",     editor:false},
-    {title:"Abrechnungsart",    field:"invoiceType",    visible:1,  width:110,      textAlign:"center",     editor:false},
-    {title:"Beendet",           field:"isTestFinished", visible:1,  width:56,       textAlign:"center",     editor:false},
-    {title:"Prüfer",            field:"operator",       visible:1,  width:56,       textAlign:"center",     editor:false},
-    {title:"Kommentar",         field:"comment",        visible:1,  width:474,   textAlign:"center",     editor:false},
-    {title:"Element",           field:"element",        visible:0,  width:0,        textAlign:"center",     editor:false},
-    {title:"TreeLevel",         field:"treeLevel",      visible:0,  width:0,        textAlign:"center",     editor:false},
+    {title:"Name",              field:"name",           visible:1,  width:130,      textAlign:"left"},
+    {title:"ProtocolIdent",     field:"protocolIdent",  visible:0,  width:0,        textAlign:"center"},
+    {title:"TestIdent",         field:"testIdent",      visible:0,  width:0,        textAlign:"center"},
+    {title:"Prüfung_Voll",      field:"testNameFull",   visible:0,  width:0,        textAlign:"center"},
+    {title:"Abgerechnet",       field:"invoice",        visible:0,  width:0,        textAlign:"center"},
+    {title:"Datum",             field:"date",           visible:1,  width:110,      textAlign:"center"},
+    {title:"Start",             field:"start",          visible:1,  width:90,       textAlign:"center"},
+    {title:"Stop",              field:"stop",           visible:1,  width:90,       textAlign:"center"},
+    {title:"Gesamtzeit",        field:"totalTime",      visible:1,  width:84,       textAlign:"center"},
+    {title:"Abrechnungsart",    field:"invoiceType",    visible:1,  width:110,      textAlign:"center"},
+    {title:"Beendet",           field:"isTestFinished", visible:1,  width:56,       textAlign:"center"},
+    {title:"Prüfer",            field:"operator",       visible:1,  width:56,       textAlign:"center"},
+    {title:"Kommentar",         field:"comment",        visible:1,  width:474,      textAlign:"center"},
+    {title:"Element",           field:"element",        visible:0,  width:0,        textAlign:"center"},
+    {title:"TreeLevel",         field:"treeLevel",      visible:0,  width:0,        textAlign:"center"},
 ];
 
 
@@ -166,6 +167,7 @@ function addSubClass(tr, row){
 
 function handleTest(tr, row){
     addSubClass(tr, row)
+    $(tr).attr('id', row['testIdent']);
     var td = tr.insertCell();           
     var field = 'name'
     td.classList.add(row['element']+"-name")
@@ -196,19 +198,44 @@ function handlePPB(tr, row){
 
 function formatCell(row, td, field){
     var cellValue="";
-    var p = document.createElement("p")   
+    var p = document.createElement("p");   
     switch(field){
         case 'name':
-            cellValue = row[field];
-            td.appendChild(document.createTextNode(cellValue));
+            cellValue = row[field];            
+            p.appendChild(document.createTextNode(cellValue));  
+            p.classList.add("ppb-p");
+            td.appendChild(p);            
+            var ul = document.createElement("ul")    
+            ul.classList.add("ppb-name-dd");
+            for (var el in testCases){       
+                var li = document.createElement("li");
+                li.classList.add("ppb-name-dd-item");
+                var node = 'TE'+ testCases[el]['TestNumber'].toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false}) + ' - ' + testCases[el]['Description'];
+                li.appendChild(document.createTextNode(node))
+                li.setAttribute("testIdent", testCases[el]['TestIdent']);
+                li.setAttribute("testNumber", testCases[el]['TestNumber']);
+                ul.appendChild(li);
+            }
+            td.appendChild(ul);
             break;
         case 'invoiceType':
             if (row[field] < 1){
                 cellValue = Invoice[row[field]]
             } else {
-                cellValue = 'Pauschale #'+(row[field])
-            }            
-            td.appendChild(document.createTextNode(cellValue));
+                cellValue = Invoice[1] + 'e #'+(row[field])
+            } 
+            p.appendChild(document.createTextNode(cellValue));  
+            p.classList.add("ppb-p"); 
+            td.appendChild(p);   
+            var ul = document.createElement("ul")    
+            ul.classList.add("ppb-invoice-dd");    
+            for (let i=0; i<Object.keys(Invoice).length; i++){ 
+                var li = document.createElement("li");
+                li.classList.add("ppb-invoice-dd-item");
+                li.appendChild(document.createTextNode(Invoice[i-1]));
+                ul.appendChild(li);
+            }
+            td.appendChild(ul);
             break;
         case 'isTestFinished':              
             var div = document.createElement("div")    
