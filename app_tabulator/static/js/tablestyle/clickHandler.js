@@ -7,9 +7,16 @@ $(document).on('click', '.ppb-invoiceType', function() {
 });
 
 function onClickDDForEdit(el){
-    el.classList.add("ppb-edit") 
     var childList = $(el).children('ul');
-    $(childList).css('display','block')
+    var expanded = $(childList).attr("expanded");
+    if (expanded == 'false'){
+        el.classList.add("ppb-edit") 
+        $(childList).css('display','block')    
+        $(childList).attr("expanded", 'true');
+    } else {        
+        $(el).removeClass('ppb-edit');
+        $(el).children('ul').attr("expanded", 'false')
+    }    
 }
 
 $(document).on('click', '.ppb-start', function() {
@@ -59,16 +66,31 @@ $('body').on('click', '.finishedCheckBox', function(){
     $(this).attr('value', checked);
 });
 
-$(document).on('click', '.ppb-name-dd-item', function() {
-    var parent=$(this).parents('td');
-    var childP = $(parent).children('p');
-    $(childP).text("TE1000"); 
+$(document).on('click', '.ppb-name-dd-item', function() {    
+    var parentTR=$(this).parents('tr');
+    var newTestIdent = $(this).attr("testident");
+    $(parentTR).attr("testident",newTestIdent);
+
+    var parentTD=$(this).parents('td');
+    var childP = $(parentTD).children('p');    
+    var value = 'TE'+ parseInt($(this).attr("testnumber")).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false});
+    $(childP).text(value); 
 
     
+    var childList = $(parentTD).children('ul');
+    console.log(childList)
+    $(childList).css('display','none');
+});
+
+$(document).on('click', '.ppb-invoice-dd-item', function() {
+    var parent=$(this).parents('td');
+    var childP = $(parent).children('p');
+    var value = $(this).attr("invoicetype"); 
+    
+    $(childP).text(getInvoiceType(value)); 
     var childList = $(parent).children('ul');
     console.log(childList)
     $(childList).css('display','none');
-    $(parent).removeClass('ppb-edit');   
 });
 
 

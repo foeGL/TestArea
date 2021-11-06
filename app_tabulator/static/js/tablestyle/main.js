@@ -4,10 +4,6 @@ const testCases = JSON.parse(document.getElementById('tests').textContent);
 
 const columns = [
     {title:"Name",              field:"name",           visible:1,  width:130,      textAlign:"left"},
-    {title:"ProtocolIdent",     field:"protocolIdent",  visible:0,  width:0,        textAlign:"center"},
-    {title:"TestIdent",         field:"testIdent",      visible:0,  width:0,        textAlign:"center"},
-    {title:"Prüfung_Voll",      field:"testNameFull",   visible:0,  width:0,        textAlign:"center"},
-    {title:"Abgerechnet",       field:"invoice",        visible:0,  width:0,        textAlign:"center"},
     {title:"Datum",             field:"date",           visible:1,  width:110,      textAlign:"center"},
     {title:"Start",             field:"start",          visible:1,  width:90,       textAlign:"center"},
     {title:"Stop",              field:"stop",           visible:1,  width:90,       textAlign:"center"},
@@ -16,15 +12,13 @@ const columns = [
     {title:"Beendet",           field:"isTestFinished", visible:1,  width:56,       textAlign:"center"},
     {title:"Prüfer",            field:"operator",       visible:1,  width:56,       textAlign:"center"},
     {title:"Kommentar",         field:"comment",        visible:1,  width:474,      textAlign:"center"},
-    {title:"Element",           field:"element",        visible:0,  width:0,        textAlign:"center"},
-    {title:"TreeLevel",         field:"treeLevel",      visible:0,  width:0,        textAlign:"center"},
 ];
 
 
 const borderStyle = '1px solid #999';
 
 const Invoice = {
-    "-1": 'Nicht Abrechnen',
+    "-1": 'Nicht abrechnen',
     "0": 'Aufwand',
     "1": 'Pauschal'
 };
@@ -166,19 +160,21 @@ function addSubClass(tr, row){
 
 
 function handleTest(tr, row){
-    addSubClass(tr, row)
+    addSubClass(tr, row);
     $(tr).attr('id', row['testIdent']);
     var td = tr.insertCell();           
-    var field = 'name'
-    td.classList.add(row['element']+"-name")
-    addTreeBranch(row, td, field)     
-    addTreeContorl(row, td, field)  
+    var field = 'name';
+    td.classList.add(row['element']+"-name");
+    addTreeBranch(row, td, field);
+    addTreeContorl(row, td, field);
     td.appendChild(document.createTextNode(row['name']));
     td.setAttribute('colSpan', headerRows['visible'].length);      
 }
 
 function handlePPB(tr, row){
     addSubClass(tr, row)
+    tr.setAttribute("testident",row["testIdent"])
+    tr.setAttribute("protocolident",row["protocolIdent"])
     for (let visibleRow in headerRows['visibleTitle']){
         var field = headerRows['visibleTitle'][visibleRow]['field']
         var td = tr.insertCell();
@@ -207,6 +203,7 @@ function formatCell(row, td, field){
             td.appendChild(p);            
             var ul = document.createElement("ul")    
             ul.classList.add("ppb-name-dd");
+            ul.setAttribute("expanded",false)
             for (var el in testCases){       
                 var li = document.createElement("li");
                 li.classList.add("ppb-name-dd-item");
@@ -219,19 +216,17 @@ function formatCell(row, td, field){
             td.appendChild(ul);
             break;
         case 'invoiceType':
-            if (row[field] < 1){
-                cellValue = Invoice[row[field]]
-            } else {
-                cellValue = Invoice[1] + 'e #'+(row[field])
-            } 
+            cellValue = getInvoiceType(row[field]);
             p.appendChild(document.createTextNode(cellValue));  
             p.classList.add("ppb-p"); 
             td.appendChild(p);   
             var ul = document.createElement("ul")    
             ul.classList.add("ppb-invoice-dd");    
+            ul.setAttribute("expanded",false)
             for (let i=0; i<Object.keys(Invoice).length; i++){ 
                 var li = document.createElement("li");
                 li.classList.add("ppb-invoice-dd-item");
+                li.setAttribute("invoicetype", i-1)
                 li.appendChild(document.createTextNode(Invoice[i-1]));
                 ul.appendChild(li);
             }
@@ -299,6 +294,15 @@ function formatCell(row, td, field){
             p.appendChild(document.createTextNode(cellValue));
             break;
     }
+    return cellValue
+}
+
+function getInvoiceType(value){    
+    if (value < 1){
+        cellValue = Invoice[value]
+    } else {
+        cellValue = Invoice[1] + 'e #'+(value)
+    } 
     return cellValue
 }
 
