@@ -1,6 +1,7 @@
 
 const dataPPB = JSON.parse(document.getElementById('ppb').textContent);
 const testCases = JSON.parse(document.getElementById('tests').textContent);
+const operator = JSON.parse(document.getElementById('operator').textContent);
 
 const columns = [
     {title:"Name",              field:"name",           visible:1,  width:130,      textAlign:"left"},
@@ -173,7 +174,6 @@ function handleTest(tr, row){
 
 function handlePPB(tr, row){
     tr.classList.add(row['element'], 'level'+row['treeLevel']);
-    console.log(row)
     addSubClass(tr, row)
     tr.setAttribute("testident",row["testIdent"])
     tr.setAttribute("protocolident",row["protocolIdent"])
@@ -340,16 +340,18 @@ function addEditForCell(td, field, row, cellValue){
 
 function addTreeBranch(row, td, field){
     var treeLevel = row['treeLevel'];
-    if (treeLevel>0){
-        if (field == 'name'){ 
-            var div=document.createElement("div")             
-            td.appendChild(div);
-            div.classList.add('table-tree-branch');
-            for (let e in settingsDIV[treeLevel]){
-                $(div).css(e, settingsDIV[treeLevel][e])
-            }
+    //if (treeLevel>0){
+    if (field == 'name'){ 
+        var div=document.createElement("div")             
+        td.appendChild(div);
+        div.classList.add('table-tree-branch');
+        /*äää
+        for (let e in settingsDIV[treeLevel]){
+            $(div).css(e, settingsDIV[treeLevel][e])
         }
+        */
     }
+    //}
 }
 
 function addTreeContorl(row, td, field){

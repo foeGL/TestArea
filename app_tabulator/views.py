@@ -26,5 +26,6 @@ def index(request):
     data = {
         'ppb': ppb, 
         'tests': testCases,
+        'operator': 'sv',
     }
     return render(request, "app_tabulator/templates/index.html", data)

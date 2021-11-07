@@ -106,6 +106,26 @@
     border-bottom: 2px solid #aaa;   
 }
 
+.level0 > td > .table-tree-branch {
+    display: none;
+}
+
+.level1 > td > .table-tree-branch, .level2 > td > .table-tree-branch, .level3 > td > .table-tree-branch, .level4 > td > .table-tree-branch {
+    display: run-in; /* sorgt dafür dass der festgelegte style auch übernommen wird! */
+}
+
+.level1 > td > .table-tree-branch {
+    margin-left: 9px;
+}
+
+.level2 > td > .table-tree-branch {
+    margin-left: 30px;
+}
+
+.level3 > td > .table-tree-branch {
+    margin-left: 49px;
+}
+
 .table-tree-control {
     width: 11px;
     height: 11px;

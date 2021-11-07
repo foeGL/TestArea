@@ -9,7 +9,6 @@ $(document).on('click', '.ppb-invoiceType', function() {
 function onClickDDForEdit(el){
     var expanded = $(el).attr("expanded");
     //console.log(el.classList)
-    console.log(expanded)
     if (expanded == 'false') { //!el.classList.contains('ppb-edit')){
         el.classList.add("ppb-edit") 
         var childList = $(el).children('ul');
@@ -67,16 +66,37 @@ $('body').on('click', '.finishedCheckBox', function(){
     $(this).attr('value', checked);
 });
 
+function getTreeLevelOfElement(treeElement){    
+    var treeLevel;
+    for (var i=0, l=treeElement.length; i<l; ++i) {
+        if(/level.*/.test(treeElement[i])) {
+            treeLevel = parseInt(treeElement[i].replace("level",""));
+            break;
+        }
+    }
+    return treeLevel
+}
+
+function setNewTreeLevel(parentTR, newParent){
+    var oldTreeLevel = getTreeLevelOfElement($(parentTR).attr("class").split(/\s+/))
+    var newTreeLevel = getTreeLevelOfElement(newParent.classList)+1;
+    $(parentTR).removeClass("level"+oldTreeLevel);
+    $(parentTR).addClass("level"+newTreeLevel);
+}
+
 $(document).on('click', '.ppb-name-dd-item', function() {    
     //-----------------------------------------------------
     //           Move PPB-TR beneath Test-TR
     //-----------------------------------------------------
     var newTestIdent = $(this).attr("testident");
     var parentTR=$(this).parents('tr');
-    if (newTestIdent != '-1'){
+    if (newTestIdent == '-1'){        
+        $(parentTR).remove();
+    } else {
         var newParent = document.getElementById(newTestIdent);
         $(parentTR).attr("testident",newTestIdent);
         parentTR.insertAfter(newParent);
+        setNewTreeLevel(parentTR, newParent);
 
         //-----------------------------------------------------
         //           Set Values and switch visibility
@@ -87,10 +107,7 @@ $(document).on('click', '.ppb-name-dd-item', function() {
         var value = 'TE'+ parseInt($(this).attr("testnumber")).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false});
         $(childP).text(value);     
         $(childList).css('display','none');
-    } else {
-        $(parentTR).remove();
     }
-
 });
 
 $(document).on('click', '.ppb-invoice-dd-item', function() {
@@ -248,7 +265,6 @@ $(document).on('click', '#expand-list', function() {
 });
 
 $(document).on('click', '#add-row', function() {
-    console.log("Neue Zeile sollte angelegt werden:")
     var tr = tbl.insertRow(1);
     row = {
         comment: "",
@@ -258,14 +274,14 @@ $(document).on('click', '#add-row', function() {
         invoiceType: -1,
         isTestFinished: false,
         name: "",
-        operator: "Penis",
+        operator: operator,
         protocolIdent: "",
         start: "",
         stop: "",
         testIdent: "",
         totalTime: "",
         treeElement: "0",
-        treeLevel: 1,
+        treeLevel: 0,
     }
     handlePPB(tr, row)
 });
