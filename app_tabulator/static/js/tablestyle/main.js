@@ -204,6 +204,12 @@ function formatCell(row, td, field){
             var ul = document.createElement("ul")    
             ul.classList.add("ppb-name-dd");
             ul.setAttribute("expanded",false)
+            var li = document.createElement("li");
+            li.classList.add("ppb-name-dd-item");
+            var node = '-- Eintrag löschen --';
+            li.appendChild(document.createTextNode(node))
+            li.setAttribute("testIdent", -1);
+            ul.appendChild(li);
             for (var el in testCases){       
                 var li = document.createElement("li");
                 li.classList.add("ppb-name-dd-item");
