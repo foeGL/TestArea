@@ -7,16 +7,17 @@ $(document).on('click', '.ppb-invoiceType', function() {
 });
 
 function onClickDDForEdit(el){
-    var childList = $(el).children('ul');
-    var expanded = $(childList).attr("expanded");
+    var expanded = $(el).attr("expanded");
     //console.log(el.classList)
+    console.log(expanded)
     if (expanded == 'false') { //!el.classList.contains('ppb-edit')){
         el.classList.add("ppb-edit") 
+        var childList = $(el).children('ul');
         $(childList).css('display','block')    
         $(childList).attr("expanded", 'true');
     } else {        
         $(el).removeClass('ppb-edit');
-        $(el).children('ul').attr("expanded", 'false')
+        $(el).attr("expanded", 'false')
     }    
 }
 
@@ -189,3 +190,83 @@ function isTime(time){
     }
     return isTime
 }
+
+
+$(document).on('click', '.table-tree-control', function() {   
+    var status = $(this).attr("status");
+    if (status == "show"){
+        collapseTreeControl(this);
+    } else {        
+        expandTreeControl(this);
+    }
+});
+
+function expandTreeControl(el){
+    var contolElements = $(el).attr("controlelements");
+    var child = $(el).children('div')
+    $(child).addClass('table-tree-control-expand')
+    $(child).removeClass('table-tree-control-collapse')
+    $(el).attr("status","show");
+    $("."+contolElements).show()
+    $("."+contolElements).each(function(index, item){
+        var subChild_td = $(item).children('td')[0];
+        var subChilds_div = $(subChild_td).children('div');
+        if (subChilds_div.length==2){
+            var controlElement = subChilds_div[1];
+            var subStatus = $(controlElement).attr("status")                
+            var subContolElements = $(controlElement).attr("controlelements")
+            if (subStatus == 'show'){
+                $("."+subContolElements).show();
+            } else {
+                $("."+subContolElements).hide();
+            }
+        }
+    });
+}
+
+function collapseTreeControl(el){
+    var contolElements = $(el).attr("controlelements");
+    var child = $(el).children('div')
+    $(child).addClass('table-tree-control-collapse')
+    $(child).removeClass('table-tree-control-expand')
+    $(el).attr("status","hide");
+    $("."+contolElements).hide();
+}
+
+$(document).on('click', '#collapse-list', function() {
+    var el = document.getElementsByClassName("table-tree-control");
+    for (var e in Object.keys(el)){
+        collapseTreeControl(el[e]);
+    }
+});
+
+$(document).on('click', '#expand-list', function() {
+    var el = document.getElementsByClassName("table-tree-control");
+    for (var e in Object.keys(el)){
+        expandTreeControl(el[e]);
+    }
+});
+
+$(document).on('click', '#add-row', function() {
+    console.log("Neue Zeile sollte angelegt werden:")
+    var tr = tbl.insertRow(1);
+    row = {
+        comment: "",
+        date: getTodaysDate(),
+        element: "ppb",
+        id: 0,
+        invoiceType: -1,
+        isTestFinished: false,
+        name: "",
+        operator: "Penis",
+        protocolIdent: "",
+        start: "",
+        stop: "",
+        testIdent: "",
+        totalTime: "",
+        treeElement: "0",
+        treeLevel: 1,
+    }
+    handlePPB(tr, row)
+});
+

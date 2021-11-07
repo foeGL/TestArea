@@ -9,11 +9,26 @@
         <script src="{% static 'js/jspdf.plugin.autotable.min.js' %}"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.0.0-rc.5/dist/html2canvas.min.js"></script>
+        <link href="{% static 'css/icons.css' %}" type="text/css" rel="stylesheet" />	
     </head>
     <body>
         {{ppb|json_script:"ppb"}}
         {{tests|json_script:"tests"}}
         <div id="content" style="width: 100%; height: 100%;">
+
+
+            <div id="button-line" style="width: 1200px; margin: 0 auto;">
+                <span id="add-row" class="search_project_button" title="Zeile hinzufügen"><i class="material-icons" style="line-height: 35px;">add_circle_outline</i></span>
+                <span class="search_project_button modal-open" data-toggle="modal" modalName="modalGenericTest" data-target="#exampleModalCenter" title="Zus&auml;tzlichen Test hinzuf&uuml;gen">
+                    <i class="material-icons" style="line-height: 35px;">view_list</i>
+                </span>
+                <span id="download-pdf" class="search_project_button" title="Als PDF drucken"><i class="material-icons" style="line-height: 35px;">print</i></span>
+                <span id="expand-list" class="search_project_button" title="Liste ausklappen"><i class="material-icons" style="line-height: 35px;">expand_more</i></span>
+                <span id="collapse-list" class="search_project_button" title="Liste zuklappen"><i class="material-icons" style="line-height: 35px;">expand_less</i></span>
+                <span id="show-hide-tests" class="search_project_button" title="Leere Tests ausblenden" showTests="true"><i id="show-hide-tests-i" class="material-icons" style="line-height: 35px;">visibility</i></span> <!-- visibility_off -->
+            </div>
+
+
             <div id="ppb-table" style="margin: 0 auto;"></div>
             <button id="pdfButton" style="margin: 0 auto;">Convert to PDF</button>
             <button id="testButton" style="margin: 0 auto;" onclick="javascript:demoFromHTML()">Test</button>
