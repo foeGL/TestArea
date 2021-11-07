@@ -161,6 +161,7 @@ function addSubClass(tr, row){
 
 function handleTest(tr, row){
     tr.classList.add(row['element'], 'level'+row['treeLevel']);
+    $(tr).attr("treeElement", row['treeElement']);
     addSubClass(tr, row);
     $(tr).attr('id', row['testIdent']);
     var td = tr.insertCell();           

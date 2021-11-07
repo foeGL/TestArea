@@ -66,22 +66,50 @@ $('body').on('click', '.finishedCheckBox', function(){
     $(this).attr('value', checked);
 });
 
-function getTreeLevelOfElement(treeElement){    
-    var treeLevel;
-    for (var i=0, l=treeElement.length; i<l; ++i) {
-        if(/level.*/.test(treeElement[i])) {
-            treeLevel = parseInt(treeElement[i].replace("level",""));
-            break;
+function getTreeLevelOfElement(treeElement, variable){    
+    if (variable == "level"){
+        var returnValue;
+        for (var i=0, l=treeElement.length; i<l; ++i) {
+            if(/level.*/.test(treeElement[i])) {
+                returnValue = parseInt(treeElement[i].replace("level",""));
+                break;
+            }
+        }
+    } else {
+        var returnValue=[];
+        for (var i=0, l=treeElement.length; i<l; ++i) {
+            if(/sub-.*/.test(treeElement[i])) {
+                returnValue.push(treeElement[i]);
+            }
         }
     }
-    return treeLevel
+    return returnValue
 }
 
 function setNewTreeLevel(parentTR, newParent){
-    var oldTreeLevel = getTreeLevelOfElement($(parentTR).attr("class").split(/\s+/))
-    var newTreeLevel = getTreeLevelOfElement(newParent.classList)+1;
+    var oldTreeLevel = getTreeLevelOfElement($(parentTR).attr("class").split(/\s+/), 'level')
     $(parentTR).removeClass("level"+oldTreeLevel);
+    var newTreeLevel = getTreeLevelOfElement(newParent.classList, 'level')+1;
     $(parentTR).addClass("level"+newTreeLevel);
+}
+
+function removeOldSubsFromElement(el){
+    treeElement = $(el).attr("class").split(/\s+/)
+    for (var i=0, l=treeElement.length; i<l; ++i) {
+        if(/sub-.*/.test(treeElement[i])) {
+            $(el).removeClass(treeElement[i]);
+        }
+    }
+}
+
+function addSubsToClass(row, newParent){
+    removeOldSubsFromElement(row);
+    var subsFromNewParent = getTreeLevelOfElement($(newParent).attr("class").split(/\s+/), 'sub-')
+    for (var subClass in Object.keys(subsFromNewParent)){
+        $(row).addClass(subsFromNewParent[subClass]);
+    }
+    var newSubFromNewParent = "sub-"+$(newParent).attr("treeelement");
+    $(row).addClass(newSubFromNewParent);
 }
 
 $(document).on('click', '.ppb-name-dd-item', function() {    
@@ -89,14 +117,16 @@ $(document).on('click', '.ppb-name-dd-item', function() {
     //           Move PPB-TR beneath Test-TR
     //-----------------------------------------------------
     var newTestIdent = $(this).attr("testident");
-    var parentTR=$(this).parents('tr');
+    var row=$(this).parents('tr');
     if (newTestIdent == '-1'){        
-        $(parentTR).remove();
+        $(row).remove();
     } else {
         var newParent = document.getElementById(newTestIdent);
-        $(parentTR).attr("testident",newTestIdent);
-        parentTR.insertAfter(newParent);
-        setNewTreeLevel(parentTR, newParent);
+        $(row).attr("testident",newTestIdent);
+        row.insertAfter(newParent);
+        setNewTreeLevel(row, newParent);
+        addSubsToClass(row, newParent)
+
 
         //-----------------------------------------------------
         //           Set Values and switch visibility
@@ -117,7 +147,6 @@ $(document).on('click', '.ppb-invoice-dd-item', function() {
     
     $(childP).text(getInvoiceType(value)); 
     var childList = $(parent).children('ul');
-    console.log(childList)
     $(childList).css('display','none');
 });
 
@@ -145,13 +174,11 @@ document.addEventListener('mouseup', function(e) {
                 if (appearance != childBoxValue){   
                     
                     var childPath = $(childSVG).children('path');   
-                    console.log(childPath, $(childPath).attr('fill'))  
                     if (childBoxValue == 'true'){         
                         var [color, figure] = setCheckboxTrue();
                     } else {      
                         var [color, figure] = getCheckboxFalse();  
                     }        
-                    console.log("set to :"+color+" and "+figure)
                     $(childPath).attr('fill', color);
                     $(childPath).attr('d', figure);
                     $(childSVG).attr('appearance',childBoxValue);
