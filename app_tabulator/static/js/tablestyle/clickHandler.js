@@ -29,13 +29,17 @@ $(document).on('click', '.ppb-operator', function() {
 });
 
 $('body').on('click', '.svgCheck', function(){
-    this.classList.add("ppb-edit")
-    var e = $(this).attr('ischecked');
+    if ($(this).attr("expanded") == 'false'){
+        this.classList.add("ppb-edit")
+        var e = $(this).attr('ischecked');
 
-    var childSVG = $(this).children('svg');
-    var childBox = $(this).children('input');
-    $(childSVG).css('display','none')
-    $(childBox).css('display','inline')
+        var childSVG = $(this).children('svg');
+        var childBox = $(this).children('input');
+        $(childSVG).css('display','none')
+        $(childBox).css('display','inline')
+    } else {           
+        $(this).attr('expanded',true); 
+    }
 });
 
 $('body').on('click', '.finishedCheckBox', function(){
@@ -50,30 +54,34 @@ $(document).on('click', '.ppb-name-dd-item', function() {
     var newTestIdent = $(this).attr("testident");
     var row=$(this).parents('tr');
     var oldTestIdent = $(row).attr("testident");
-    if (newTestIdent == '-1'){        
-        $(row).remove();
-    } else {
-        // Bevor verschoben wurde
-        var newParent = document.getElementById(newTestIdent);
-        $(row).attr("testident",newTestIdent);
-        row.insertAfter(newParent);
-        
-        // Nachdem verschoben wurde
-        setNewTreeLevel(row, newParent);
-        addSubsToClass(row, newParent);
-        checkTreeControlForParentsAfterMove(oldTestIdent, newTestIdent);
+    var parentTD=$(this).parents('td');
+    if (newTestIdent != oldTestIdent){
+        if (newTestIdent == '-1'){        
+            $(row).remove();
+        } else {
+            // Bevor verschoben wurde
+            var newParent = document.getElementById(newTestIdent);
+            $(row).attr("testident",newTestIdent);
+            row.insertAfter(newParent);
+            
+            // Nachdem verschoben wurde
+            setNewTreeLevel(row, newParent);
+            addSubsToClass(row, newParent);
+            checkTreeControlForParentsAfterMove(oldTestIdent, newTestIdent);
 
-        //-----------------------------------------------------
-        // Set Values and switch visibility of DropDown
-        //-----------------------------------------------------
-        var parentTD=$(this).parents('td');
-        var childP = $(parentTD).children('p');  
-        var childList = $(parentTD).children('ul');  
-        var value = 'TE'+ parseInt($(this).attr("testnumber")).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false});
-        $(childP).text(value);     
-        $(childList).css('display','none');
-        applyVisibilityOfParent(newParent);
+            //-----------------------------------------------------
+            // Set Values and switch visibility of DropDown
+            //-----------------------------------------------------
+            var childP = $(parentTD).children('p');    
+            var value = 'TE'+ parseInt($(this).attr("testnumber")).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false});
+            $(childP).text(value);    
+            //var childList = $(parentTD).children('ul'); 
+            //$(childList).css('display','none');
+            applyVisibilityOfParent(newParent);
+        }
     }
+    $(parentTD).removeClass('ppb-edit');     
+    $(parentTD).attr('expanded',true); 
 });
 
 $(document).on('click', '.ppb-invoice-dd-item', function() {
@@ -82,9 +90,10 @@ $(document).on('click', '.ppb-invoice-dd-item', function() {
     var value = $(this).attr("invoicetype"); 
     
     $(childP).text(getInvoiceType(value)); 
-    var childList = $(parent).children('ul');
-    $(childList).css('display','none');    
-    $(this).removeClass('ppb-edit');     
+    //var childList = $(parent).children('ul');
+    //$(childList).css('display','none');    
+    $(parent).removeClass('ppb-edit');     
+    $(parent).attr('expanded',true); 
 });
 
 document.addEventListener('mouseup', function(e) {
@@ -136,7 +145,8 @@ document.addEventListener('mouseup', function(e) {
                 break;                    
         }
         //$(box).children('ul').attr("expanded", 'false') 
-        $(box).removeClass('ppb-edit');     
+        $(box).removeClass('ppb-edit');        
+        $(parent).attr('expanded',false); 
     }
 });
 
@@ -159,7 +169,7 @@ $(document).on('click', '#collapse-list', function() {
 $(document).on('click', '#expand-list', function() {
     var el = document.getElementsByClassName("table-tree-control");
     for (var e in Object.keys(el)){
-        expandTreeControl(el[e]);
+        expandElement(el[e]);
     }
 });
 
@@ -191,8 +201,8 @@ $(document).on('click', '#hide-ppbs', function() {
         var el = expanders[expander];
         if ($(el).attr("element") == "test"){
             collapseTreeControl(el);
-        } else {            
-            expandTreeControl(el);
+        } else {     
+            expandElement(el);
         }
     }
 });

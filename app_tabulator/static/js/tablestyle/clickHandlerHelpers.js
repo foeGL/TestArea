@@ -101,15 +101,7 @@ function checkTreeControlForParentsAfterMove(oldTestIdent, newTestIdent){
 
 function applyVisibilityOfParent(parent){    
     var el = getTreeControlOfTR(parent);
-    var status = $(el).attr("status");
-    console.log(status)
-    if (status == "show"){
-        console.log("expand!")
-        expandTreeControl(el);
-    } else {        
-        console.log("collapse!")
-        collapseTreeControl(el);
-    }
+    expandTreeControl(el);
 }
 
 
@@ -155,24 +147,43 @@ function collapseTreeControl(el){
 
 
 function expandTreeControl(el){
-    var contolElements = $(el).attr("controlelements");
-    var child = $(el).children('div')
-    $(child).addClass('table-tree-control-expand')
-    $(child).removeClass('table-tree-control-collapse')
+    var controledElements = $(el).attr("controlelements");
+    var child = $(el).children('div');
+    $(child).addClass('table-tree-control-expand');
+    $(child).removeClass('table-tree-control-collapse');
     $(el).attr("status","show");
-    $("."+contolElements).show()
-    $("."+contolElements).each(function(index, item){
+    $("."+controledElements).show()
+    $("."+controledElements).each(function(index, item){
         var subChild_td = $(item).children('td')[0];
         var subChilds_div = $(subChild_td).children('div');
-        if (subChilds_div.length==2){
-            var controlElement = subChilds_div[1];
-            var subStatus = $(controlElement).attr("status")                
-            var subContolElements = $(controlElement).attr("controlelements")
-            if (subStatus == 'show'){
-                $("."+subContolElements).show();
-            } else {
-                $("."+subContolElements).hide();
+        var controlElement;
+        if(subChilds_div){
+            for (var child in Object.keys(subChilds_div)){
+                if (subChilds_div[child]){
+                    if (subChilds_div[child].classList.contains("table-tree-control")){
+                        controlElement = subChilds_div[child];
+                        break;
+                    }
+                }
+            }
+            if (controlElement){
+                var subStatus = $(controlElement).attr("status")                
+                var subContolElements = $(controlElement).attr("controlelements")
+                if (subStatus == 'show'){
+                    $("."+subContolElements).show();
+                } else {
+                    $("."+subContolElements).hide();
+                }
             }
         }
     });
+}
+
+function expandElement(el){
+    var controledElements = $(el).attr("controlelements");
+    var child = $(el).children('div');
+    $(child).addClass('table-tree-control-expand');
+    $(child).removeClass('table-tree-control-collapse');
+    $(el).attr("status","show");
+    $("."+controledElements).show()
 }

@@ -121,6 +121,7 @@ function checkForChildren(tbl, row){
 
 function handleHeader(tr, row){
     tr.classList.add(row['element'], 'level'+row['treeLevel']);
+    //$(tr).attr("treeElement", row['treeElement']);
     addSubClass(tr, row)
     var td = tr.insertCell();
     var field = 'name'
