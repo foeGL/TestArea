@@ -362,6 +362,7 @@ function addTreeContorl(row, td, field){
             var subdiv=document.createElement("div");
             td.appendChild(div);
             div.classList.add("table-tree-control");
+            div.setAttribute("element", row['element']);    
             div.setAttribute("controlelements", "sub-"+row['treeElement']);    
             div.setAttribute("status", "show");
             //div.innerHTML = "-";

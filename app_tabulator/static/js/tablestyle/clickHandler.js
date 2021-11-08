@@ -313,3 +313,12 @@ $(document).on('click', '#add-row', function() {
     handlePPB(tr, row)
 });
 
+$(document).on('click', '#hide-ppbs', function() {
+    var expanders = document.getElementsByClassName('table-tree-control');
+    for (var expander in Object.keys(expanders)){
+        var el = expanders[expander];
+        if ($(el).attr("element") == "test"){
+            collapseTreeControl(el);
+        }
+    }
+});
