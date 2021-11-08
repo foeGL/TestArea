@@ -83,7 +83,8 @@ $(document).on('click', '.ppb-invoice-dd-item', function() {
     
     $(childP).text(getInvoiceType(value)); 
     var childList = $(parent).children('ul');
-    $(childList).css('display','none');
+    $(childList).css('display','none');    
+    $(this).removeClass('ppb-edit');     
 });
 
 document.addEventListener('mouseup', function(e) {
