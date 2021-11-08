@@ -357,17 +357,18 @@ function addTreeBranch(row, td, field){
 
 function addTreeContorl(row, td, field){
     if (field == 'name'){ 
-        if ("_children" in row){
-            var div=document.createElement("div")  ;
-            var subdiv=document.createElement("div");
-            td.appendChild(div);
-            div.classList.add("table-tree-control");
-            div.setAttribute("element", row['element']);    
-            div.setAttribute("controlelements", "sub-"+row['treeElement']);    
-            div.setAttribute("status", "show");
-            //div.innerHTML = "-";
-            div.appendChild(subdiv);
-            subdiv.classList.add("table-tree-control-expand");
+        var div=document.createElement("div")  ;
+        var subdiv=document.createElement("div");
+        div.classList.add("table-tree-control");
+        div.setAttribute("element", row['element']);    
+        div.setAttribute("controlelements", "sub-"+row['treeElement']);    
+        div.setAttribute("status", "show");
+        td.appendChild(div);
+        //div.innerHTML = "-";
+        subdiv.classList.add("table-tree-control-expand");
+        div.appendChild(subdiv);
+        if (!row.hasOwnProperty("_children")){            
+            div.classList.add("table-tree-control-invisible");
         }
     }
 }

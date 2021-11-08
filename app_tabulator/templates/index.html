@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script src="{% static 'js/jquery.js' %}"></script>
         <link href="{% static 'css/table-style.css' %}" rel="stylesheet" />
         <script src="{% static 'js/jspdf.umd.min.js' %}"></script>
@@ -28,7 +29,7 @@
                 <span id="download-pdf" class="search_project_button" title="Als PDF drucken"><i class="material-icons" style="line-height: 35px;">print</i></span>
                 <span id="expand-list" class="search_project_button" title="Liste ausklappen"><i class="material-icons" style="line-height: 35px;">expand_more</i></span>
                 <span id="collapse-list" class="search_project_button" title="Liste zuklappen"><i class="material-icons" style="line-height: 35px;">expand_less</i></span>
-                <span id="hide-ppbs" class="search_project_button" title="Belegungen ausblenden" showTests="true"><i id="show-hide-tests-i" class="material-icons" style="line-height: 35px;">visibility</i></span> <!-- visibility_off -->
+                <span id="hide-ppbs" class="search_project_button" title="Zeige nur Prüfplan" showTests="true"><i id="show-hide-tests-i" class="material-icons" style="line-height: 35px;">visibility_off</i></span> <!-- visibility_off -->
             </div>
 
 
@@ -36,6 +37,7 @@
     
         </div>
         <script src="{% static 'js/tablestyle/main.js' %}"></script>
+        <script src="{% static 'js/tablestyle/clickHandlerHelpers.js' %}"></script>
         <script src="{% static 'js/tablestyle/clickHandler.js' %}"></script>
     </body>
 </htmL>

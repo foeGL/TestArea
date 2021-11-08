@@ -164,6 +164,11 @@
     margin-left: -3px;
 }
 
+
+.table-tree-control-invisible {
+    display: none;
+}
+
 .svgCheck {
     cursor: pointer;
 }
