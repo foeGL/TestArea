@@ -29,17 +29,12 @@ $(document).on('click', '.ppb-operator', function() {
 });
 
 $('body').on('click', '.svgCheck', function(){
-    if ($(this).attr("expanded") == 'false'){
-        this.classList.add("ppb-edit")
-        var e = $(this).attr('ischecked');
-
-        var childSVG = $(this).children('svg');
-        var childBox = $(this).children('input');
-        $(childSVG).css('display','none')
-        $(childBox).css('display','inline')
-    } else {           
-        $(this).attr('expanded',true); 
-    }
+    this.classList.add("ppb-edit")
+    var e = $(this).attr('ischecked');
+    var childSVG = $(this).children('svg');
+    var childBox = $(this).children('input');
+    $(childSVG).css('display','none')
+    $(childBox).css('display','inline')
 });
 
 $('body').on('click', '.finishedCheckBox', function(){
